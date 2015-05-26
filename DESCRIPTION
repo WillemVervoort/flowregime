@@ -7,7 +7,7 @@ Maintainer: Michael C Koohafkan <michael.koohafkan@gmail.com>
 Description: Compute environmental flow indicators from hydrologic time series. 
     Defines functions for computing flow indicators such as time to rise, time 
     to fall and days above/below a flow threshold. The package is designed to 
-    work with `zoo` and `xts` objects.
+    work with zoo and xts objects.
 URL: https://github.com/mkoohafkan/flowregime
 BugReports: https://github.com/mkoohafkan/flowregime/issues 
 License: GPL (>= 3)

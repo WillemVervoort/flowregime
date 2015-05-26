@@ -1,4 +1,5 @@
 #' Environmental Flow Regime Components
+#'
 #' A package for computing environmental flow regime components
 #' from hydrologic time series. See the vignette to get started.
 #' @name flowregime-package

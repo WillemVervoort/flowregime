@@ -7,7 +7,7 @@
 total_time_above_threshold(ts, ut)
 }
 \arguments{
-\item{ts}{A time series, e.g. of class \code{zoo}.}
+\item{ts}{A time series of  of class \code{xts}.}
 
 \item{ut}{The upper flow threshold.}
 }
@@ -21,11 +21,8 @@ Compute the total amount of time that flow is
   at or above a given threshold.
 }
 \examples{
-testts = zooreg(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))),
-  order.by = seq(as.POSIXct("2010-01-01 00:00:00"),
-  as.POSIXct("2010-02-01 00:00:00"), length.out = 1489),
-  frequency=2*24*365)
-upper = quantile(testts, 0.75)
-total_time_above_threshold(testts, upper)
+data(siouxcity)
+upper = quantile(siouxcity, 0.75)
+total_time_above_threshold(siouxcity, upper)
 }
 

@@ -3,11 +3,8 @@
 \docType{package}
 \name{flowregime-package}
 \alias{flowregime-package}
-\title{Environmental Flow Regime Components
-A package for computing environmental flow regime components
-from hydrologic time series. See the vignette to get started.}
+\title{Environmental Flow Regime Components}
 \description{
-Environmental Flow Regime Components
 A package for computing environmental flow regime components
 from hydrologic time series. See the vignette to get started.
 }

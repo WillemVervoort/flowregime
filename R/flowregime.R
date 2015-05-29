@@ -4,30 +4,60 @@
 #' from hydrologic time series. See the vignette to get started.
 #' @name flowregime-package
 #' @docType package
-#' @import xts
+#' @import xts zoo
+#' @importFrom EcoHydRology BaseflowSeparation
 NULL
+
+#' Missouri River Flows at Sioux City, IA
+#' 
+#' Missouri River daily discharge recorded at USGS gauge 06486000 in 
+#'   Sioux City, IA from 2004-01-01 to 2015-05-25.
+#' @docType data
+#' @keywords datasets
+#' @name siouxcity
+#' @usage data(siouxcity)
+#' @format An \code{xts} object.
+NULL
+
+#' Separate Flow Data
+#'
+#' Separate flow data into baseflow and quickflow. 
+#' 
+#' @details This function is basically a \code{zoo}/\code{xts} wrapper for
+#'   \code{EcoHydRology::BaseflowSeparation}.
+#' @seealso \code{\link[EcoHydRology]{BaseflowSeparation}}. 
+#' @param ts A time series of  of class \code{xts}.
+#' @param filter_parameter Filter parameter. Default value is that 
+#'   recommended by Nathan and McMahon (1990).
+#' @param passes The number of times to pass the filter over the data.
+#' @return An \code{xts} object containing the columns "baseflow" and 
+#'   "quickflow".
+#'
+#' @export
+separate_flow = function(ts, filter_parameter = 0.925, passes = 3){
+  f = BaseflowSeparation(coredata(ts), filter_parameter = fp, passes = passes)
+  names(f) = c("baseflow", "quickflow")
+  return(xts(f, order.by = index(ts)))
+}
 
 #' Time To Rise
 #'
 #' Compute the time for flow to rise up to or above a given threshold.
 #'
-#' @param ts A time series, e.g. of class \code{zoo}.
+#' @param ts A time series of  of class \code{xts}.
 #' @param ut The upper flow threshold for which the time to rise is 
 #'   computed. If omitted, the maximum flow of the series is used.
 #' @param lt The lower flow threshold from which to start computing 
 #'   the time to rise. If omitted, the minimum flow of the series is 
 #'   used.
-#' @return the time to rise, in a format dependent on the value of 
+#' @return The time to rise, in a format dependent on the value of 
 #'   \code{index(ts)}.
 #'
 #' @examples
-#' testts = xts(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))), 
-#'   order.by = seq(as.POSIXct("2010-01-01 00:00:00"), 
-#'   as.POSIXct("2010-02-01 00:00:00"), length.out = 1489), 
-#'   frequency=2*24*365)
-#' lower = quantile(testts, 0.25)
-#' upper= quantile(testts, 0.75)
-#' time_to_rise(testts, upper, lower)
+#' data(siouxcity)
+#' lower = quantile(siouxcity, 0.25)
+#' upper= quantile(siouxcity, 0.75)
+#' time_to_rise(siouxcity, upper, lower)
 #'
 #' @export
 time_to_rise = function(ts, ut, lt){
@@ -52,23 +82,20 @@ time_to_rise = function(ts, ut, lt){
 #'
 #' Compute the time for flow to fall down to or below a given threshold.
 #'
-#' @param ts A time series, e.g. of class \code{zoo}.
+#' @param ts A time series of  of class \code{xts}.
 #' @param lt The lower flow threshold for which the time to recede is 
 #'   computed. If omitted, the minimum flow of the series is used.
 #' @param ut The upper flow threshold from which to start computing 
 #'   the time to recede. If omitted, the maximum flow of the series is 
 #'   used.
-#' @return the time to recede, in a format dependent on the value of 
+#' @return The time to recede, in a format dependent on the value of 
 #'   \code{index(ts)}.
 #'
 #' @examples
-#' testts = zoo(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))), 
-#'   order.by = seq(as.POSIXct("2010-01-01 00:00:00"), 
-#'   as.POSIXct("2010-02-01 00:00:00"), length.out = 1489), 
-#'   frequency=2*24*365)
-#' lower = quantile(testts, 0.25)
-#' upper= quantile(testts, 0.75)
-#' time_to_recede(testts, lower, upper)
+#' data(siouxcity)
+#' lower = quantile(siouxcity, 0.25)
+#' upper= quantile(siouxcity, 0.75)
+#' time_to_recede(siouxcity, lower, upper)
 #'
 #' @export
 time_to_recede = function(ts, lt, ut){
@@ -94,19 +121,16 @@ time_to_recede = function(ts, lt, ut){
 #' Compute the longest continuous period during which flow is 
 #'   at or above a given threshold.
 #'
-#' @param ts A time series, e.g. of class \code{zoo}.
+#' @param ts A time series of  of class \code{xts}.
 #' @param ut The upper flow threshold used to compute duration.
 #' @return The duration of the longest period where flow is at
 #'   or above the threshold, in a format dependent on the value 
 #'   of \code{index(ts)}.
 #'
 #' @examples
-#' testts = zoo(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))), 
-#'   order.by = seq(as.POSIXct("2010-01-01 00:00:00"), 
-#'   as.POSIXct("2010-02-01 00:00:00"), length.out = 1489), 
-#'   frequency=2*24*365)
-#' upper = quantile(testts, 0.75)
-#' high_flow_duration(testts, upper)
+#' data(siouxcity)
+#' upper = quantile(siouxcity, 0.75)
+#' high_flow_duration(siouxcity, upper)
 #'
 #' @export
 high_flow_duration = function(ts, ut){
@@ -124,19 +148,16 @@ high_flow_duration = function(ts, ut){
 #' Compute the longest continuous period during which flow is 
 #'   at or below a given threshold.
 #'
-#' @param ts A time series, e.g. of class \code{zoo}.
+#' @param ts A time series of  of class \code{xts}.
 #' @param lt The lower flow threshold used to compute duration.
 #' @return The duration of the longest period where flow is at
 #'   or below the threshold, in a format dependent on the value 
 #'   of \code{index(ts)}.
 #'
 #' @examples
-#' testts = zoo(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))), 
-#'   order.by = seq(as.POSIXct("2010-01-01 00:00:00"), 
-#'   as.POSIXct("2010-02-01 00:00:00"), length.out = 1489), 
-#'   frequency=2*24*365)
-#' lower = quantile(testts, 0.25)
-#' low_flow_duration(testts, lower)
+#' data(siouxcity)
+#' lower = quantile(siouxcity, 0.25)
+#' low_flow_duration(siouxcity, lower)
 #'
 #' @export
 low_flow_duration = function(ts, lt){
@@ -154,19 +175,16 @@ low_flow_duration = function(ts, lt){
 #' Compute the total amount of time that flow is 
 #'   at or above a given threshold.
 #'
-#' @param ts A time series, e.g. of class \code{zoo}.
+#' @param ts A time series of  of class \code{xts}.
 #' @param ut The upper flow threshold.
 #' @return The total amount of time that flow is at or 
 #'   above the threshold, in a format dependent on the 
 #'   value of \code{index(ts)}.
 #'
 #' @examples
-#' testts = zooreg(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))), 
-#'   order.by = seq(as.POSIXct("2010-01-01 00:00:00"), 
-#'   as.POSIXct("2010-02-01 00:00:00"), length.out = 1489), 
-#'   frequency=2*24*365)
-#' upper = quantile(testts, 0.75)
-#' total_time_above_threshold(testts, upper)
+#' data(siouxcity)
+#' upper = quantile(siouxcity, 0.75)
+#' total_time_above_threshold(siouxcity, upper)
 #'
 #' @export
 total_time_above_threshold = function(ts, ut){
@@ -187,19 +205,16 @@ total_time_above_threshold = function(ts, ut){
 #' Compute the total amount of time that flow is 
 #'   at or below a given threshold.
 #'
-#' @param ts A time series, e.g. of class \code{zoo}.
+#' @param ts A time series of  of class \code{xts}.
 #' @param lt The lower flow threshold.
 #' @return The total amount of time that flow is at or 
 #'   below the threshold, in a format dependent on the 
 #'   value of \code{index(ts)}.
 #'
 #' @examples
-#' testts = zooreg(c(sort(rlnorm(1000)), rev(sort(rlnorm(489)))), 
-#'   order.by = seq(as.POSIXct("2010-01-01 00:00:00"), 
-#'   as.POSIXct("2010-02-01 00:00:00"), length.out = 1489), 
-#'   frequency=2*24*365)
-#' lower = quantile(testts, 0.25)
-#' total_time_below_threshold(testts, lower)
+#' data(siouxcity)
+#' lower = quantile(siouxcity, 0.25)
+#' total_time_below_threshold(siouxcity, lower)
 #'
 #' @export
 total_time_below_threshold = function(ts, lt){
@@ -213,6 +228,37 @@ total_time_below_threshold = function(ts, lt){
       "may be erroneous.")
   dt = as.difftime(c(dt, dt[length(dt)]), units = units(dt))
   sum(dt[d])
+}
+
+#' Number of High Flow Pulses
+#'
+#' Compute the number of high flow pulses (peaks) above a threshold.
+#' 
+#' @param ts A time series of  of class \code{xts}.
+#' @param width The window size within which to detect peaks. Must be odd.
+#' @param ut The upper flow threshold above which to identify peaks.
+#' @param ... Other arguments passed to \code{rollapply}.
+#' @return The number of peaks above the threshold.
+#'
+#' @examples
+#' data(siouxcity)
+#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"])
+#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5)
+#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5, ut = 15000)
+#'
+#' @export
+number_of_pulses = function(ts, width = 3, ut = 0, ...){
+  if(as.integer(width) != width){
+    warning("Rounding argument 'width' to nearest integer.")
+    width = round(width)
+  }
+  if(width < 1 | width %% 2 == 0)
+    stop("Argument 'width' must be an odd positive integer.")    
+  mid = (width - 1) %/% 2 + 1
+  peaks = coredata(rollapply(ts, width, function(x) which.max(x) == mid, 
+    align = "center", ...))
+  peaks[ts < ut] = FALSE
+  sum(peaks, na.rm = TRUE)
 }
 
 

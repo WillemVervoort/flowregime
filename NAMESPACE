@@ -2,8 +2,12 @@
 
 export(high_flow_duration)
 export(low_flow_duration)
+export(number_of_pulses)
+export(separate_flow)
 export(time_to_recede)
 export(time_to_rise)
 export(total_time_above_threshold)
 export(total_time_below_threshold)
 import(xts)
+import(zoo)
+importFrom(EcoHydRology,BaseflowSeparation)

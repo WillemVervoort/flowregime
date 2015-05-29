@@ -7,7 +7,7 @@
 high_flow_duration(ts, ut)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{ut}{The upper flow threshold used to compute duration.}
 }

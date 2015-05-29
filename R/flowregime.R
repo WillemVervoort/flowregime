@@ -26,7 +26,7 @@ NULL
 #' @details This function is basically a \code{zoo}/\code{xts} wrapper for
 #'   \code{EcoHydRology::BaseflowSeparation}.
 #' @seealso \code{\link[EcoHydRology]{BaseflowSeparation}}. 
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param filter_parameter Filter parameter. Default value is that 
 #'   recommended by Nathan and McMahon (1990).
 #' @param passes The number of times to pass the filter over the data.
@@ -44,7 +44,7 @@ separate_flow = function(ts, filter_parameter = 0.925, passes = 3){
 #'
 #' Compute the time for flow to rise up to or above a given threshold.
 #'
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold for which the time to rise is 
 #'   computed. If omitted, the maximum flow of the series is used.
 #' @param lt The lower flow threshold from which to start computing 
@@ -82,7 +82,7 @@ time_to_rise = function(ts, ut, lt){
 #'
 #' Compute the time for flow to fall down to or below a given threshold.
 #'
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold for which the time to recede is 
 #'   computed. If omitted, the minimum flow of the series is used.
 #' @param ut The upper flow threshold from which to start computing 
@@ -121,7 +121,7 @@ time_to_recede = function(ts, lt, ut){
 #' Compute the longest continuous period during which flow is 
 #'   at or above a given threshold.
 #'
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold used to compute duration.
 #' @return The duration of the longest period where flow is at
 #'   or above the threshold, in a format dependent on the value 
@@ -148,7 +148,7 @@ high_flow_duration = function(ts, ut){
 #' Compute the longest continuous period during which flow is 
 #'   at or below a given threshold.
 #'
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold used to compute duration.
 #' @return The duration of the longest period where flow is at
 #'   or below the threshold, in a format dependent on the value 
@@ -175,7 +175,7 @@ low_flow_duration = function(ts, lt){
 #' Compute the total amount of time that flow is 
 #'   at or above a given threshold.
 #'
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold.
 #' @return The total amount of time that flow is at or 
 #'   above the threshold, in a format dependent on the 
@@ -205,7 +205,7 @@ total_time_above_threshold = function(ts, ut){
 #' Compute the total amount of time that flow is 
 #'   at or below a given threshold.
 #'
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold.
 #' @return The total amount of time that flow is at or 
 #'   below the threshold, in a format dependent on the 
@@ -234,7 +234,7 @@ total_time_below_threshold = function(ts, lt){
 #'
 #' Compute the number of high flow pulses (peaks) above a threshold.
 #' 
-#' @param ts A time series of  of class \code{xts}.
+#' @param ts A time series of class \code{xts}.
 #' @param width The window size within which to detect peaks. Must be odd.
 #' @param ut The upper flow threshold above which to identify peaks.
 #' @param ... Other arguments passed to \code{rollapply}.

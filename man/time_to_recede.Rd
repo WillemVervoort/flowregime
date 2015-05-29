@@ -7,7 +7,7 @@
 time_to_recede(ts, lt, ut)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold for which the time to recede is
 computed. If omitted, the minimum flow of the series is used.}

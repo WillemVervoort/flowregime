@@ -7,7 +7,7 @@
 total_time_below_threshold(ts, lt)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold.}
 }

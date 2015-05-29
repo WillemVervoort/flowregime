@@ -7,7 +7,7 @@
 number_of_pulses(ts, width = 3, ut = 0, ...)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{width}{The window size within which to detect peaks. Must be odd.}
 

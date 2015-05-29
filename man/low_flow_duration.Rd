@@ -7,7 +7,7 @@
 low_flow_duration(ts, lt)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold used to compute duration.}
 }

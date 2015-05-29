@@ -7,7 +7,7 @@
 time_to_rise(ts, ut, lt)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{ut}{The upper flow threshold for which the time to rise is
 computed. If omitted, the maximum flow of the series is used.}

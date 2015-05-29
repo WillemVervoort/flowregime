@@ -7,7 +7,7 @@
 separate_flow(ts, filter_parameter = 0.925, passes = 3)
 }
 \arguments{
-\item{ts}{A time series of  of class \code{xts}.}
+\item{ts}{A time series of class \code{xts}.}
 
 \item{filter_parameter}{Filter parameter. Default value is that
 recommended by Nathan and McMahon (1990).}

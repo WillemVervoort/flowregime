@@ -9,8 +9,8 @@ separate_flow(ts, filter_parameter = 0.925, passes = 3)
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
-\item{filter_parameter}{Filter parameter. Default value is that
-recommended by Nathan and McMahon (1990).}
+\item{filter_parameter}{Filter parameter for flow separation algorithm.
+Default value is that recommended by Nathan and McMahon (1990).}
 
 \item{passes}{The number of times to pass the filter over the data.}
 }
@@ -24,6 +24,12 @@ Separate flow data into baseflow and quickflow.
 \details{
 This function is basically a \code{zoo}/\code{xts} wrapper for
   \code{EcoHydRology::BaseflowSeparation}.
+}
+\references{
+Nathan, R. J., and T. A. McMahon. "Evaluation of automated
+  techniques for base flow and recession analyses." Water Resources
+  Research 26.7 (1990): 1465-1473.
+  \url{http://dx.doi.org/10.1029/WR026i007p01465}.
 }
 \seealso{
 \code{\link[EcoHydRology]{BaseflowSeparation}}.

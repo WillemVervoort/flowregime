@@ -22,7 +22,7 @@ An \code{xts} object containing the columns "baseflow" and
 Separate flow data into baseflow and quickflow.
 }
 \details{
-This function is basically a \code{zoo}/\code{xts} wrapper for
+This function is basically a \code{xts} wrapper for
   \code{EcoHydRology::BaseflowSeparation}.
 }
 \references{

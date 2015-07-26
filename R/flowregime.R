@@ -23,7 +23,7 @@ NULL
 #'
 #' Separate flow data into baseflow and quickflow. 
 #' 
-#' @details This function is basically a \code{zoo}/\code{xts} wrapper for
+#' @details This function is basically a \code{xts} wrapper for
 #'   \code{EcoHydRology::BaseflowSeparation}.
 #' @seealso \code{\link[EcoHydRology]{BaseflowSeparation}}. 
 #' @param ts A time series of class \code{xts}.
@@ -243,8 +243,15 @@ total_time_below_threshold = function(ts, lt){
 #' @param ts A time series of class \code{xts}.
 #' @param width The window size within which to detect peaks. Must be odd.
 #' @param ut The upper flow threshold above which to identify peaks.
-#' @param ... Other arguments passed to \code{rollapply}.
+#' @param ... Other arguments passed to method \code{rollapply} (except for 
+#'   \code{align}; see 'details' for more information).
 #' @return The number of peaks above the threshold.
+#'
+#' @details The method \code{rollapply} identifies peaks by testing whether the 
+#'   value at the center of the rolling window is the maximum value within the 
+#'   window. The function therefore sets the \code{rollapply} argument 
+#'   \code{align = "center"}. Larger windows can be used to essentially reduce 
+#'   the tolerance for what is considered a 'peak' in the presence of noise.
 #'
 #' @examples
 #' data(siouxcity)

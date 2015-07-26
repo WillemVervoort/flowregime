@@ -1,7 +1,7 @@
 Package: flowregime
-Title: Environmental flow regime indicators from hydrologic time series
+Title: Environmental Flow Regime Indicators
 Version: 0.3.0
-Date: 2015-05-25
+Date: 2015-07-25
 Author: Michael C Koohafkan [aut, cre]
 Maintainer: Michael C Koohafkan <michael.koohafkan@gmail.com>
 Description: Compute environmental flow indicators from hydrologic time series. 

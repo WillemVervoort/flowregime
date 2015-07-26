@@ -4,7 +4,7 @@
 #' from hydrologic time series. See the vignette to get started.
 #' @name flowregime-package
 #' @docType package
-#' @import xts zoo
+#' @import zoo xts
 #' @importFrom EcoHydRology BaseflowSeparation
 NULL
 

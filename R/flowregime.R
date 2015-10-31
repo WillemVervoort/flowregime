@@ -118,7 +118,7 @@ time_to_recede = function(ts, lt, ut){
   if(length(l) < 1)
     return(NA)
   else
-    low = min(l)
+    low = min(l) + high - 1
   return(index(ts)[low] - index(ts)[high])
 }
 

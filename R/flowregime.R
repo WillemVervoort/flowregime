@@ -4,8 +4,9 @@
 #' from hydrologic time series. See the vignette to get started.
 #' @name flowregime-package
 #' @docType package
-#' @import zoo xts
 #' @importFrom EcoHydRology BaseflowSeparation
+#' @import zoo
+#' @import xts
 NULL
 
 #' Missouri River Flows at Sioux City, IA
@@ -255,9 +256,9 @@ total_time_below_threshold = function(ts, lt){
 #'
 #' @examples
 #' data(siouxcity)
-#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"])
-#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5)
-#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5, ut = 15000)
+#' number_of_pulses(siouxcity)
+#' number_of_pulses(siouxcity, width = 5)
+#' number_of_pulses(siouxcity, width = 5, ut = 15000)
 #'
 #' @export
 number_of_pulses = function(ts, width = 3, ut = 0, ...){

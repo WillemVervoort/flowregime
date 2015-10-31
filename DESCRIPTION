@@ -11,8 +11,8 @@ Description: Compute environmental flow indicators from hydrologic time series.
 URL: https://github.com/mkoohafkan/flowregime
 BugReports: https://github.com/mkoohafkan/flowregime/issues 
 License: GPL (>= 3)
-Depends: R (>= 3.2.0)
-Imports: zoo (>= 1.7.12), xts (>= 0.9.7), EcoHydRology (>= 0.4.12)
+Depends: R (>= 3.2.0), xts (>= 0.9-7)
+Imports: EcoHydRology (>= 0.4.12), zoo
 Suggests: knitr
 VignetteBuilder: knitr
 LazyData: true

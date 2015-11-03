@@ -4,7 +4,6 @@
 #' from hydrologic time series. See the vignette to get started.
 #' @name flowregime-package
 #' @docType package
-#' @importFrom EcoHydRology BaseflowSeparation
 #' @import zoo
 #' @import xts
 NULL
@@ -19,33 +18,6 @@ NULL
 #' @usage data(siouxcity)
 #' @format An \code{xts} object.
 NULL
-
-#' Separate Flow Data
-#'
-#' Separate flow data into baseflow and quickflow. 
-#' 
-#' @details This function is basically a \code{xts} wrapper for
-#'   \code{EcoHydRology::BaseflowSeparation}.
-#' @seealso \code{\link[EcoHydRology]{BaseflowSeparation}}. 
-#' @param ts A time series of class \code{xts}.
-#' @param filter_parameter Filter parameter for flow separation algorithm. 
-#'   Default value is that recommended by Nathan and McMahon (1990).
-#' @param passes The number of times to pass the filter over the data.
-#' @return An \code{xts} object containing the columns "baseflow" and 
-#'   "quickflow".
-#'
-#' @references Nathan, R. J., and T. A. McMahon. "Evaluation of automated 
-#'   techniques for base flow and recession analyses." Water Resources 
-#'   Research 26.7 (1990): 1465-1473. 
-#'   \url{http://dx.doi.org/10.1029/WR026i007p01465}.
-#'
-#' @export
-separate_flow = function(ts, filter_parameter = 0.925, passes = 3){
-  f = BaseflowSeparation(coredata(ts), filter_parameter = filter_parameter, 
-    passes = passes)
-  names(f) = c("baseflow", "quickflow")
-  return(xts(f, order.by = index(ts)))
-}
 
 #' Time To Rise
 #'

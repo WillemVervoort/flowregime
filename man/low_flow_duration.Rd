@@ -4,12 +4,15 @@
 \alias{low_flow_duration}
 \title{Low Flow Duration}
 \usage{
-low_flow_duration(ts, lt)
+low_flow_duration(ts, lt, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold used to compute duration.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+duration instead of the count.}
 }
 \value{
 The duration of the longest period where flow is at
@@ -22,7 +25,7 @@ Compute the longest continuous period during which flow is
 }
 \examples{
 data(siouxcity)
-lower = quantile(siouxcity, 0.25)
-low_flow_duration(siouxcity, lower)
+low_flow_duration(siouxcity['2006-06/2007-06'], 18000)
+low_flow_duration(siouxcity['2006-06/2007-06'], 18000, which = TRUE)
 }
 

@@ -4,7 +4,7 @@
 \alias{time_to_recede}
 \title{Time To Recede}
 \usage{
-time_to_recede(ts, lt, ut)
+time_to_recede(ts, lt, ut, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -15,6 +15,9 @@ computed. If omitted, the minimum flow of the series is used.}
 \item{ut}{The upper flow threshold from which to start computing
 the time to recede. If omitted, the maximum flow of the series is
 used.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+recession limb instead of the count.}
 }
 \value{
 The time to recede, in a format dependent on the value of
@@ -25,8 +28,8 @@ Compute the time for flow to fall down to or below a given threshold.
 }
 \examples{
 data(siouxcity)
-lower = quantile(siouxcity, 0.25)
-upper= quantile(siouxcity, 0.75)
-time_to_recede(siouxcity, lower, upper)
+time_to_recede(siouxcity['2011'])
+time_to_recede(siouxcity['2011'], which = TRUE)
+time_to_recede(siouxcity['2011'], lt = 70000, which = TRUE)
 }
 

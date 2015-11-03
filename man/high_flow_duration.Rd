@@ -4,12 +4,18 @@
 \alias{high_flow_duration}
 \title{High Flow Duration}
 \usage{
-high_flow_duration(ts, ut)
+high_flow_duration(ts, ut, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{ut}{The upper flow threshold used to compute duration.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+duration instead of the count.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+duration instead of the count.}
 }
 \value{
 The duration of the longest period where flow is at
@@ -22,7 +28,7 @@ Compute the longest continuous period during which flow is
 }
 \examples{
 data(siouxcity)
-upper = quantile(siouxcity, 0.75)
-high_flow_duration(siouxcity, upper)
+high_flow_duration(siouxcity['2011'], 70000)
+high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
 }
 

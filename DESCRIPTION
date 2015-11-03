@@ -1,7 +1,7 @@
 Package: flowregime
 Title: Environmental Flow Regime Indicators
-Version: 0.3.0
-Date: 2015-07-25
+Version: 0.4.0.9000
+Date: 2015-11-02
 Author: Michael C Koohafkan [aut, cre]
 Maintainer: Michael C Koohafkan <michael.koohafkan@gmail.com>
 Description: Compute environmental flow indicators from hydrologic time series. 
@@ -12,7 +12,7 @@ URL: https://github.com/mkoohafkan/flowregime
 BugReports: https://github.com/mkoohafkan/flowregime/issues 
 License: GPL (>= 3)
 Depends: R (>= 3.2.0), xts (>= 0.9-7)
-Imports: zoo (>= 1.7-12), EcoHydRology (>= 0.4.12)
+Imports: zoo (>= 1.7-12)
 Suggests: knitr
 VignetteBuilder: knitr
 LazyData: true

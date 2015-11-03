@@ -4,7 +4,7 @@
 \alias{time_to_rise}
 \title{Time To Rise}
 \usage{
-time_to_rise(ts, ut, lt)
+time_to_rise(ts, ut, lt, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -15,6 +15,9 @@ computed. If omitted, the maximum flow of the series is used.}
 \item{lt}{The lower flow threshold from which to start computing
 the time to rise. If omitted, the minimum flow of the series is
 used.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+rising limb instead of the count.}
 }
 \value{
 The time to rise, in a format dependent on the value of
@@ -25,8 +28,8 @@ Compute the time for flow to rise up to or above a given threshold.
 }
 \examples{
 data(siouxcity)
-lower = quantile(siouxcity, 0.25)
-upper= quantile(siouxcity, 0.75)
-time_to_rise(siouxcity, upper, lower)
+time_to_rise(siouxcity['2011'])
+time_to_rise(siouxcity['2011'], which = TRUE)
+time_to_rise(siouxcity['2011'], lt = 70000)
 }
 

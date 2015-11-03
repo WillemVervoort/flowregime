@@ -22,7 +22,6 @@ Compute the total amount of time that flow is
 }
 \examples{
 data(siouxcity)
-upper = quantile(siouxcity, 0.75)
-total_time_above_threshold(siouxcity, upper)
+total_time_above_threshold(siouxcity['2010'], 60000)
 }
 

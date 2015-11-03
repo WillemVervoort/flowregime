@@ -4,17 +4,17 @@
 \alias{number_of_pulses}
 \title{Number of High Flow Pulses}
 \usage{
-number_of_pulses(ts, width = 3, ut = 0, ...)
+number_of_pulses(ts, ws = 3, ut = 0, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
-\item{width}{The window size within which to detect peaks. Must be odd.}
+\item{ws}{The window size within which to detect peaks. Must be odd.}
 
 \item{ut}{The upper flow threshold above which to identify peaks.}
 
-\item{...}{Other arguments passed to method \code{rollapply} (except for
-\code{align}; see 'details' for more information).}
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+peaks instead of the count.}
 }
 \value{
 The number of peaks above the threshold.
@@ -25,14 +25,14 @@ Compute the number of high flow pulses (peaks) above a threshold.
 \details{
 The method \code{rollapply} identifies peaks by testing whether the
   value at the center of the rolling window is the maximum value within the
-  window. The function therefore sets the \code{rollapply} argument
-  \code{align = "center"}. Larger windows can be used to essentially reduce
-  the tolerance for what is considered a 'peak' in the presence of noise.
+  window. Larger windows can be used to essentially reduce the tolerance for
+  what is considered a 'peak' in the presence of noise.
 }
 \examples{
 data(siouxcity)
-number_of_pulses(siouxcity["2005-01-01::2005-01-23"])
-number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5)
-number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5, ut = 15000)
+number_of_pulses(siouxcity["2009"])
+number_of_pulses(siouxcity["2009"], which = TRUE)
+number_of_pulses(siouxcity["2009"], ws = 7, which = TRUE)
+number_of_pulses(siouxcity["2009"], ws = 7, ut = 32000)
 }
 

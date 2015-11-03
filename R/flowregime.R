@@ -57,17 +57,19 @@ separate_flow = function(ts, filter_parameter = 0.925, passes = 3){
 #' @param lt The lower flow threshold from which to start computing 
 #'   the time to rise. If omitted, the minimum flow of the series is 
 #'   used.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   rising limb instead of the count.
 #' @return The time to rise, in a format dependent on the value of 
 #'   \code{index(ts)}.
 #'
 #' @examples
 #' data(siouxcity)
-#' lower = quantile(siouxcity, 0.25)
-#' upper= quantile(siouxcity, 0.75)
-#' time_to_rise(siouxcity, upper, lower)
+#' time_to_rise(siouxcity['2011'])
+#' time_to_rise(siouxcity['2011'], which = TRUE)
+#' time_to_rise(siouxcity['2011'], lt = 70000)
 #'
 #' @export
-time_to_rise = function(ts, ut, lt){
+time_to_rise = function(ts, ut, lt, which = FALSE){
   if(missing(lt))
     lt = min(ts)
   if(missing(ut))
@@ -80,9 +82,11 @@ time_to_rise = function(ts, ut, lt){
   l = which(ts[1:high] <= lt)
   if(length(l) < 1)
     return(NA)
+  low = max(l)
+  if(which)
+    index(ts)[seq(from = low, to= high, by = 1)]
   else
-    low = max(l)
-  return(index(ts)[high] - index(ts)[low])
+    index(ts)[high] - index(ts)[low]
 }
 
 #' Time To Recede
@@ -95,17 +99,19 @@ time_to_rise = function(ts, ut, lt){
 #' @param ut The upper flow threshold from which to start computing 
 #'   the time to recede. If omitted, the maximum flow of the series is 
 #'   used.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   recession limb instead of the count.
 #' @return The time to recede, in a format dependent on the value of 
 #'   \code{index(ts)}.
 #'
 #' @examples
 #' data(siouxcity)
-#' lower = quantile(siouxcity, 0.25)
-#' upper= quantile(siouxcity, 0.75)
-#' time_to_recede(siouxcity, lower, upper)
+#' time_to_recede(siouxcity['2011'])
+#' time_to_recede(siouxcity['2011'], which = TRUE)
+#' time_to_recede(siouxcity['2011'], lt = 70000, which = TRUE)
 #'
 #' @export
-time_to_recede = function(ts, lt, ut){
+time_to_recede = function(ts, lt, ut, which = FALSE){
   if(missing(ut))
     ut = max(ts)
   u = which(ts >= ut)
@@ -118,9 +124,11 @@ time_to_recede = function(ts, lt, ut){
   l = which(ts[high:length(index(ts))] <= lt)
   if(length(l) < 1)
     return(NA)
+  low = min(l) + high - 1
+  if(which)
+    index(ts)[seq(from = high, to = low, by = 1)]
   else
-    low = min(l) + high - 1
-  return(index(ts)[low] - index(ts)[high])
+    index(ts)[low] - index(ts)[high]
 }
 
 #' High Flow Duration
@@ -130,24 +138,31 @@ time_to_recede = function(ts, lt, ut){
 #'
 #' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold used to compute duration.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   duration instead of the count.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   duration instead of the count.
 #' @return The duration of the longest period where flow is at
 #'   or above the threshold, in a format dependent on the value 
 #'   of \code{index(ts)}.
 #'
 #' @examples
 #' data(siouxcity)
-#' upper = quantile(siouxcity, 0.75)
-#' high_flow_duration(siouxcity, upper)
+#' high_flow_duration(siouxcity['2011'], 70000)
+#' high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
 #'
 #' @export
-high_flow_duration = function(ts, ut){
+high_flow_duration = function(ts, ut, which = FALSE){
   pd = ts
   pd[ts < ut] = NA
   m = na.contiguous(pd)
   if(length(m) < 1)
     return(NA)
+  if(which)
+    index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
+      to = which(index(ts) == tail(index(m), 1)), by = 1)]
   else
-    return(tail(index(m), 1) - head(index(m), 1))
+    tail(index(m), 1) - head(index(m), 1)
 }
 
 #' Low Flow Duration
@@ -157,24 +172,29 @@ high_flow_duration = function(ts, ut){
 #'
 #' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold used to compute duration.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   duration instead of the count.
 #' @return The duration of the longest period where flow is at
 #'   or below the threshold, in a format dependent on the value 
 #'   of \code{index(ts)}.
 #'
 #' @examples
 #' data(siouxcity)
-#' lower = quantile(siouxcity, 0.25)
-#' low_flow_duration(siouxcity, lower)
+#' low_flow_duration(siouxcity['2006-06/2007-06'], 18000)
+#' low_flow_duration(siouxcity['2006-06/2007-06'], 18000, which = TRUE)
 #'
 #' @export
-low_flow_duration = function(ts, lt){
+low_flow_duration = function(ts, lt, which = FALSE){
   pd = ts
   pd[ts > lt] = NA
   m = na.contiguous(pd)
   if(length(m) < 1)
     return(NA)
+  if(which)
+    index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
+      to = which(index(ts) == tail(index(m), 1)), by = 1)]
   else
-    return(tail(index(m), 1) - head(index(m), 1))
+    tail(index(m), 1) - head(index(m), 1)
 }
 
 #' Total Time Above Threshold
@@ -190,8 +210,7 @@ low_flow_duration = function(ts, lt){
 #'
 #' @examples
 #' data(siouxcity)
-#' upper = quantile(siouxcity, 0.75)
-#' total_time_above_threshold(siouxcity, upper)
+#' total_time_above_threshold(siouxcity['2010'], 60000)
 #'
 #' @export
 total_time_above_threshold = function(ts, ut){
@@ -220,8 +239,7 @@ total_time_above_threshold = function(ts, ut){
 #'
 #' @examples
 #' data(siouxcity)
-#' lower = quantile(siouxcity, 0.25)
-#' total_time_below_threshold(siouxcity, lower)
+#' total_time_below_threshold(siouxcity['2007-06/2008-06'], 15000)
 #'
 #' @export
 total_time_below_threshold = function(ts, lt){
@@ -242,37 +260,40 @@ total_time_below_threshold = function(ts, lt){
 #' Compute the number of high flow pulses (peaks) above a threshold.
 #' 
 #' @param ts A time series of class \code{xts}.
-#' @param width The window size within which to detect peaks. Must be odd.
+#' @param ws The window size within which to detect peaks. Must be odd.
 #' @param ut The upper flow threshold above which to identify peaks.
-#' @param ... Other arguments passed to method \code{rollapply} (except for 
-#'   \code{align}; see 'details' for more information).
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   peaks instead of the count.
 #' @return The number of peaks above the threshold.
 #'
 #' @details The method \code{rollapply} identifies peaks by testing whether the 
 #'   value at the center of the rolling window is the maximum value within the 
-#'   window. The function therefore sets the \code{rollapply} argument 
-#'   \code{align = "center"}. Larger windows can be used to essentially reduce 
-#'   the tolerance for what is considered a 'peak' in the presence of noise.
+#'   window. Larger windows can be used to essentially reduce the tolerance for 
+#'   what is considered a 'peak' in the presence of noise.
 #'
 #' @examples
 #' data(siouxcity)
-#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"])
-#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5)
-#' number_of_pulses(siouxcity["2005-01-01::2005-01-23"], width = 5, ut = 15000)
+#' number_of_pulses(siouxcity["2009"])
+#' number_of_pulses(siouxcity["2009"], which = TRUE)
+#' number_of_pulses(siouxcity["2009"], ws = 7, which = TRUE)
+#' number_of_pulses(siouxcity["2009"], ws = 7, ut = 32000)
 #'
 #' @export
-number_of_pulses = function(ts, width = 3, ut = 0, ...){
-  if(as.integer(width) != width){
-    warning("Rounding argument 'width' to nearest integer.")
-    width = round(width)
+number_of_pulses = function(ts, ws = 3, ut = 0, which = FALSE){
+  if(as.integer(ws) != ws){
+    warning("Rounding argument 'ws' to nearest integer.")
+    ws = round(ws)
   }
-  if(width < 1 | width %% 2 == 0)
-    stop("Argument 'width' must be an odd positive integer.")    
-  mid = (width - 1) %/% 2 + 1
-  peaks = coredata(rollapply(ts, width, function(x) which.max(x) == mid, 
-    align = "center", ...))
+  if(ws < 1 | ws %% 2 == 0)
+    stop("Argument 'ws' must be an odd positive integer.")    
+  mid = (ws - 1) %/% 2 + 1
+  peaks = as.logical(coredata(rollapply(ts, ws, function(x) 
+    which.max(x) == mid, align = "center", fill = FALSE, by.column = TRUE)))
   peaks[ts < ut] = FALSE
-  sum(peaks, na.rm = TRUE)
+  if(which)
+    index(ts)[peaks]
+  else
+    sum(peaks, na.rm = TRUE)
 }
 
 

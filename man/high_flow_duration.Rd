@@ -13,9 +13,6 @@ high_flow_duration(ts, ut, which = FALSE)
 
 \item{which}{Logical: If \code{TRUE}, return the index locations of the
 duration instead of the count.}
-
-\item{which}{Logical: If \code{TRUE}, return the index locations of the
-duration instead of the count.}
 }
 \value{
 The duration of the longest period where flow is at

@@ -112,8 +112,6 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
 #' @param ut The upper flow threshold used to compute duration.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   duration instead of the count.
-#' @param which Logical: If \code{TRUE}, return the index locations of the 
-#'   duration instead of the count.
 #' @return The duration of the longest period where flow is at
 #'   or above the threshold, in a format dependent on the value 
 #'   of \code{index(ts)}.

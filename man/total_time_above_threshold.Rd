@@ -4,12 +4,15 @@
 \alias{total_time_above_threshold}
 \title{Total Time Above Threshold}
 \usage{
-total_time_above_threshold(ts, ut)
+total_time_above_threshold(ts, ut, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{ut}{The upper flow threshold.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+high flow records.}
 }
 \value{
 The total amount of time that flow is at or
@@ -23,5 +26,6 @@ Compute the total amount of time that flow is
 \examples{
 data(siouxcity)
 total_time_above_threshold(siouxcity['2010'], 60000)
+total_time_above_threshold(siouxcity['2010'], 60000, which = TRUE)
 }
 

@@ -174,6 +174,8 @@ low_flow_duration = function(ts, lt, which = FALSE){
 #'
 #' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   high flow records.
 #' @return The total amount of time that flow is at or 
 #'   above the threshold, in a format dependent on the 
 #'   value of \code{index(ts)}.
@@ -181,13 +183,16 @@ low_flow_duration = function(ts, lt, which = FALSE){
 #' @examples
 #' data(siouxcity)
 #' total_time_above_threshold(siouxcity['2010'], 60000)
+#' total_time_above_threshold(siouxcity['2010'], 60000, which = TRUE)
 #'
 #' @export
-total_time_above_threshold = function(ts, ut){
+total_time_above_threshold = function(ts, ut, which = FALSE){
   pd = ts
   d = which(pd >= ut)
   if(length(d) < 1)
     return(NA)
+  if(which)
+    return(index(ts)[d])
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
     warning("Time series is irregular. Total time calculation ",
@@ -203,6 +208,8 @@ total_time_above_threshold = function(ts, ut){
 #'
 #' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   low flow records.
 #' @return The total amount of time that flow is at or 
 #'   below the threshold, in a format dependent on the 
 #'   value of \code{index(ts)}.
@@ -210,11 +217,14 @@ total_time_above_threshold = function(ts, ut){
 #' @examples
 #' data(siouxcity)
 #' total_time_below_threshold(siouxcity['2007-06/2008-06'], 15000)
+#' total_time_below_threshold(siouxcity['2007-06/2008-06'], 15000, which = TRUE)
 #'
 #' @export
-total_time_below_threshold = function(ts, lt){
+total_time_below_threshold = function(ts, lt, which = FALSE){
   pd = ts
   d = which(pd <= lt)
+  if(which)
+    return(index(ts)[d])
   if(length(d) < 1)
     return(NA)
   dt = diff(index(pd))
@@ -243,10 +253,10 @@ total_time_below_threshold = function(ts, lt){
 #'
 #' @examples
 #' data(siouxcity)
-#' number_of_pulses(siouxcity["2009"])
-#' number_of_pulses(siouxcity["2009"], which = TRUE)
-#' number_of_pulses(siouxcity["2009"], ws = 7, which = TRUE)
-#' number_of_pulses(siouxcity["2009"], ws = 7, ut = 32000)
+#' number_of_pulses(siouxcity['2009'])
+#' number_of_pulses(siouxcity['2009'], which = TRUE)
+#' number_of_pulses(siouxcity['2009'], ws = 7, which = TRUE)
+#' number_of_pulses(siouxcity['2009'], ws = 7, ut = 32000)
 #'
 #' @export
 number_of_pulses = function(ts, ws = 3, ut = 0, which = FALSE){

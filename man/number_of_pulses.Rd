@@ -30,9 +30,9 @@ The method \code{rollapply} identifies peaks by testing whether the
 }
 \examples{
 data(siouxcity)
-number_of_pulses(siouxcity["2009"])
-number_of_pulses(siouxcity["2009"], which = TRUE)
-number_of_pulses(siouxcity["2009"], ws = 7, which = TRUE)
-number_of_pulses(siouxcity["2009"], ws = 7, ut = 32000)
+number_of_pulses(siouxcity['2009'])
+number_of_pulses(siouxcity['2009'], which = TRUE)
+number_of_pulses(siouxcity['2009'], ws = 7, which = TRUE)
+number_of_pulses(siouxcity['2009'], ws = 7, ut = 32000)
 }
 

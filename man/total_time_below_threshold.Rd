@@ -4,12 +4,15 @@
 \alias{total_time_below_threshold}
 \title{Total Time Below Threshold}
 \usage{
-total_time_below_threshold(ts, lt)
+total_time_below_threshold(ts, lt, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold.}
+
+\item{which}{Logical: If \code{TRUE}, return the index locations of the
+low flow records.}
 }
 \value{
 The total amount of time that flow is at or
@@ -23,5 +26,6 @@ Compute the total amount of time that flow is
 \examples{
 data(siouxcity)
 total_time_below_threshold(siouxcity['2007-06/2008-06'], 15000)
+total_time_below_threshold(siouxcity['2007-06/2008-06'], 15000, which = TRUE)
 }
 

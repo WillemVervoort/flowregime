@@ -48,15 +48,21 @@ time_to_rise = function(ts, ut, lt, which = FALSE){
     ut = max(ts)
   u = which(ts >= ut)
   if(length(u) < 1)
-    return(NA)
+    if(which)
+      return(u)
+    else
+      return(NA)
   else
     high = min(u)
   l = which(ts[1:high] <= lt)
   if(length(l) < 1)
-    return(NA)
+    if(which)
+      return(l)
+    else
+      return(NA)
   low = max(l)
   if(which)
-    index(ts)[seq(from = low, to= high, by = 1)]
+    index(ts)[seq(from = low, to = high, by = 1)]
   else
     index(ts)[high] - index(ts)[low]
 }
@@ -88,14 +94,20 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
     ut = max(ts)
   u = which(ts >= ut)
   if(length(u) < 1)
-    return(NA)
+    if(which)
+      return(u)
+    else
+      return(NA)
   else
     high = max(u)
   if(missing(lt))
     lt = min(ts[high:length(index(ts))])
   l = which(ts[high:length(index(ts))] <= lt)
   if(length(l) < 1)
-    return(NA)
+    if(which)
+      return(l)
+    else
+      return(NA)
   low = min(l) + high - 1
   if(which)
     index(ts)[seq(from = high, to = low, by = 1)]
@@ -126,11 +138,11 @@ high_flow_duration = function(ts, ut, which = FALSE){
   pd = ts
   pd[ts < ut] = NA
   m = na.contiguous(pd)
-  if(length(m) < 1)
-    return(NA)
   if(which)
-    index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
-      to = which(index(ts) == tail(index(m), 1)), by = 1)]
+    return(index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
+      to = which(index(ts) == tail(index(m), 1)), by = 1)])
+  if(length(m) < 1)
+    return(0)
   else
     tail(index(m), 1) - head(index(m), 1)
 }
@@ -158,11 +170,11 @@ low_flow_duration = function(ts, lt, which = FALSE){
   pd = ts
   pd[ts > lt] = NA
   m = na.contiguous(pd)
-  if(length(m) < 1)
-    return(NA)
   if(which)
-    index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
-      to = which(index(ts) == tail(index(m), 1)), by = 1)]
+    return(index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
+      to = which(index(ts) == tail(index(m), 1)), by = 1)])
+  if(length(m) < 1)
+    return(0)
   else
     tail(index(m), 1) - head(index(m), 1)
 }
@@ -189,10 +201,10 @@ low_flow_duration = function(ts, lt, which = FALSE){
 total_time_above_threshold = function(ts, ut, which = FALSE){
   pd = ts
   d = which(pd >= ut)
-  if(length(d) < 1)
-    return(NA)
   if(which)
     return(index(ts)[d])
+  if(length(d) < 1)
+    return(0)
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
     warning("Time series is irregular. Total time calculation ",
@@ -226,7 +238,7 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
   if(which)
     return(index(ts)[d])
   if(length(d) < 1)
-    return(NA)
+    return(0)
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
     warning("Time series is irregular. Total time calculation ",

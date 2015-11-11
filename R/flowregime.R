@@ -137,12 +137,15 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
 high_flow_duration = function(ts, ut, which = FALSE){
   pd = ts
   pd[ts < ut] = NA
+  if(all(is.na(pd)))
+    if(which)
+      return(integer(0))
+    else
+      return(NA)
   m = na.contiguous(pd)
   if(which)
-    return(index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
-      to = which(index(ts) == tail(index(m), 1)), by = 1)])
-  if(length(m) < 1)
-    return(0)
+    index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
+      to = which(index(ts) == tail(index(m), 1)), by = 1)]
   else
     tail(index(m), 1) - head(index(m), 1)
 }
@@ -169,12 +172,15 @@ high_flow_duration = function(ts, ut, which = FALSE){
 low_flow_duration = function(ts, lt, which = FALSE){
   pd = ts
   pd[ts > lt] = NA
+  if(all(is.na(pd)))
+    if(which)
+      return(integer(0))
+    else
+      return(NA)
   m = na.contiguous(pd)
   if(which)
-    return(index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
-      to = which(index(ts) == tail(index(m), 1)), by = 1)])
-  if(length(m) < 1)
-    return(0)
+    index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
+      to = which(index(ts) == tail(index(m), 1)), by = 1)]
   else
     tail(index(m), 1) - head(index(m), 1)
 }

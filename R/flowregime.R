@@ -3,6 +3,7 @@
 #' A package for computing environmental flow regime components
 #' from hydrologic time series. See the vignette to get started.
 #' @name flowregime-package
+#' @aliases flowregime
 #' @docType package
 #' @import zoo
 #' @import xts
@@ -258,8 +259,8 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' Compute the number of high flow pulses (peaks) above a threshold.
 #' 
 #' @param ts A time series of class \code{xts}.
-#' @param ws The window size within which to detect peaks. Must be odd.
 #' @param ut The upper flow threshold above which to identify peaks.
+#' @param ws The window size within which to detect peaks. Must be odd.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   peaks instead of the count.
 #' @return The number of peaks above the threshold.
@@ -277,7 +278,7 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' number_of_pulses(siouxcity['2009'], ws = 7, ut = 32000)
 #'
 #' @export
-number_of_pulses = function(ts, ws = 3, ut = 0, which = FALSE){
+number_of_pulses = function(ts, ut = 0, ws = 3, which = FALSE){
   if(as.integer(ws) != ws){
     warning("Rounding argument 'ws' to nearest integer.")
     ws = round(ws)

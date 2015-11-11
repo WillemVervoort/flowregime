@@ -4,14 +4,14 @@
 \alias{number_of_pulses}
 \title{Number of High Flow Pulses}
 \usage{
-number_of_pulses(ts, ws = 3, ut = 0, which = FALSE)
+number_of_pulses(ts, ut = 0, ws = 3, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
-\item{ws}{The window size within which to detect peaks. Must be odd.}
-
 \item{ut}{The upper flow threshold above which to identify peaks.}
+
+\item{ws}{The window size within which to detect peaks. Must be odd.}
 
 \item{which}{Logical: If \code{TRUE}, return the index locations of the
 peaks instead of the count.}

@@ -2,6 +2,7 @@
 % Please edit documentation in R/flowregime.R
 \docType{package}
 \name{flowregime-package}
+\alias{flowregime}
 \alias{flowregime-package}
 \title{Environmental Flow Regime Components}
 \description{

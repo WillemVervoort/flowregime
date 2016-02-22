@@ -272,13 +272,13 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #'
 #' @examples
 #' data(siouxcity)
-#' number_of_pulses(siouxcity['2009'])
-#' number_of_pulses(siouxcity['2009'], which = TRUE)
-#' number_of_pulses(siouxcity['2009'], ws = 7, which = TRUE)
-#' number_of_pulses(siouxcity['2009'], ws = 7, ut = 32000)
+#' number_of_high_pulses(siouxcity['2009'])
+#' number_of_high_pulses(siouxcity['2009'], which = TRUE)
+#' number_of_high_pulses(siouxcity['2009'], ws = 7, which = TRUE)
+#' number_of_high_pulses(siouxcity['2009'], ws = 7, ut = 32000)
 #'
 #' @export
-number_of_pulses = function(ts, ut = 0, ws = 3, which = FALSE){
+number_of_high_pulses = function(ts, ut = 0, ws = 3, which = FALSE){
   if(as.integer(ws) != ws){
     warning("Rounding argument 'ws' to nearest integer.")
     ws = round(ws)
@@ -295,4 +295,112 @@ number_of_pulses = function(ts, ut = 0, ws = 3, which = FALSE){
     sum(peaks, na.rm = TRUE)
 }
 
+#' Number of Low Flow Pulses
+#'
+#' Compute the number of low flow pulses below a threshold.
+#' 
+#' @param ts A time series of class \code{xts}.
+#' @param lt The lower flow threshold below which to identify pulses.
+#' @param ws The window size within which to detect pulses. Must be odd.
+#' @param which Logical: If \code{TRUE}, return the index locations of the 
+#'   pulses instead of the count.
+#' @return The number of pulses below the threshold.
+#'
+#' @details The method \code{rollapply} identifies pulses by testing whether the 
+#'   value at the center of the rolling window is the minimum value within the 
+#'   window. Larger windows can be used to essentially reduce the tolerance for 
+#'   what is considered a 'pulse' in the presence of noise.
+#'
+#' @examples
+#' data(siouxcity)
+#' number_of_low_pulses(siouxcity['2009'])
+#' number_of_low_pulses(siouxcity['2009'], which = TRUE)
+#' number_of_low_pulses(siouxcity['2009'], ws = 7, which = TRUE)
+#' number_of_low_pulses(siouxcity['2009'], ws = 7, ut = 32000)
+#'
+#' @export
+number_of_low_pulses = function(ts, lt = 0, ws = 3, which = FALSE){
+  if(as.integer(ws) != ws){
+    warning("Rounding argument 'ws' to nearest integer.")
+    ws = round(ws)
+  }
+  if(ws < 1 | ws %% 2 == 0)
+    stop("Argument 'ws' must be an odd positive integer.")    
+  mid = (ws - 1) %/% 2 + 1
+  peaks = as.logical(coredata(rollapply(ts, ws, function(x) 
+    which.min(x) == mid, align = "center", fill = FALSE, by.column = TRUE)))
+  peaks[ts > lt] = FALSE
+  if(which)
+    index(ts)[peaks]
+  else
+    sum(peaks, na.rm = TRUE)
+}
+
+#' Mean Duration of High Flow Pulses
+#'
+#' Compute the average duration of high flow pulses above a threshold.
+#'
+#' @param ts A time series of class \code{xts}.
+#' @param ut The upper flow threshold above which to identify pulses.
+#' @return The mean duration of high flow pulses.
+#'
+#' @export
+mean_high_pulse_duration = function(ts, ut){
+  pd = ts
+  pd[ts < ut] = NA
+  if(all(is.na(pd)))
+    return(NA)
+  idx <- 1 + cumsum(is.na(coredata(pd)))
+  not.na <- !is.na(coredata(pd))
+  pulses = split(index(pd)[not.na], idx[not.na])
+  pulselengths = sapply(pulses, function(x) max(x) - min(x))
+  mean(pulselengths)
+}
+
+#' Mean Duration of Low Flow Pulses
+#'
+#' Compute the average duration of low flow pulses below a threshold.
+#'
+#' @param ts A time series of class \code{xts}.
+#' @param lt The lower flow threshold below which to identify pulses.
+#' @return The mean duration of high flow pulses.
+#'
+#' @examples
+#' data(siouxcity)
+#' mean_high_pulse_duration(siouxcity['2009'])
+#' mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
+#'
+#' @export
+mean_low_pulse_duration = function(ts, lt){
+  pd = ts
+  pd[ts > lt] = NA
+  if(all(is.na(pd)))
+    return(NA)
+  idx <- 1 + cumsum(is.na(coredata(pd)))
+  not.na <- !is.na(coredata(pd))
+  pulses = split(index(pd)[not.na], idx[not.na])
+  pulselengths = sapply(pulses, function(x) max(x) - min(x))
+  mean(pulselengths)
+}
+
+#' Number of No-Flow Days
+#'
+#' Compute the number of days for which flow is zero (to some tolerance).
+#'
+#' @param ts A time series of class \code{xts}.
+#' @param tol A tolerance factor below which flows are considered of negligible 
+#'   magntiude. 
+#' @return The number of no-flow days.
+#'
+#' @examples
+#' data(siouxcity)
+#' number_of_no_flow_days(siouxcity['2009'])
+#' number_of_no_flow_days(siouxcity['2009'], tol = 0.1)
+#'
+#' @export
+number_of_no_flow_days = function(ts, tol = 0){
+  pd = ts
+  noflow = pd[coredata(pd) <= tol]
+  length(unique(format(index(noflow), "%Y-%m-%d")))
+}
 

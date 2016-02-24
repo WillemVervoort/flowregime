@@ -5,7 +5,7 @@
 \title{Indicators of Hydrologic Alteration}
 \usage{
 IHA(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, ut, lt,
-  stats = TRUE)
+  keep.raw = TRUE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -25,9 +25,8 @@ recommends the 75th flow percentile for pre-impact conditions.}
 \item{lt}{The lower flow threshold for identifying low flow pulses. IHA 
 recommends the 25th flow percentile for pre-impact conditions.}
 
-\item{stats}{Logical: If \code{TRUE}, return the inter-annual statistics 
-of each parameter. Otherwise, return the hydrologic attributes for each 
-year of record.}
+\item{keep.raw}{Logical: return the hydrologic attributes for each year 
+of record as attribute 'raw' of the output dataframe.}
 }
 \value{
 A 3-column dataframe. If \code{stat = TRUE}, the dataframe contains 
@@ -46,7 +45,7 @@ The IHA method requires a regular time series with no missing
 \examples{
 data(siouxcity)
 IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000)
-IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, stats = FALSE)
+IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, keep.raw = FALSE)
 IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
   yearend = "09-30", ut = 32000, lt = 12000)
 

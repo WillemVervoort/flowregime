@@ -13,9 +13,8 @@
 #'   recommends the 75th flow percentile for pre-impact conditions.
 #' @param lt The lower flow threshold for identifying low flow pulses. IHA 
 #'   recommends the 25th flow percentile for pre-impact conditions.
-#' @param stats Logical: If \code{TRUE}, return the inter-annual statistics 
-#'   of each parameter. Otherwise, return the hydrologic attributes for each 
-#'   year of record. 
+#' @param keep.raw Logical: return the hydrologic attributes for each year 
+#'   of record as attribute 'raw' of the output dataframe. 
 #' @return A 3-column dataframe. If \code{stat = TRUE}, the dataframe contains 
 #'   the parameter names, the central tendencies and the measures of 
 #'   dispersion. If \code{stat = FALSE}, the dataframe contains the parameter 
@@ -31,13 +30,13 @@
 #' @examples
 #' data(siouxcity)
 #' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000)
-#' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, stats = FALSE)
+#' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, keep.raw = FALSE)
 #' IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
 #'   yearend = "09-30", ut = 32000, lt = 12000)
 #'
 #' @export
 IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
-  ut, lt, stats = TRUE){
+  ut, lt, keep.raw = TRUE){
   # argument checking
   if(yearstart == yearend)
     stop("Arguments 'yearstart' and 'yearend' must be different")
@@ -65,8 +64,6 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
   }
   res = do.call(rbind.data.frame, records)
   rownames(res) = NULL
-  if(!stats)
-    return(res)
   # compute stats for each group
   pnames = unique(res$parameter)
   pcentral = setNames(vector("numeric", length(pnames)), pnames)
@@ -75,8 +72,12 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
     pcentral[[p]] = mean(res[res$parameter == p, "value"])
     pdispersion[[p]] = sd(res[res$parameter == p, "value"])/pcentral[[p]]
   }
-  data.frame(parameter = pnames, central.tendency = pcentral, 
+  res2 = data.frame(parameter = pnames, central.tendency = pcentral, 
     dispersion = pdispersion, row.names = NULL)  
+  if(keep.raw)
+    structure(res2, raw = res)
+  else
+    res2
 }
 
 #' Compare IHA Results
@@ -97,14 +98,14 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
 #'
 #' @examples
 #' data(siouxcity)
-#' pre = iha(siouxcity['2004/2009'], ut = 32000, lt = 12000)
-#' post = iha(siouxcity['2010/2014'], ut = 32000, lt = 12000)
+#' pre = IHA(siouxcity['2004/2009'], ut = 32000, lt = 12000)
+#' post = IHA(siouxcity['2010/2014'], ut = 32000, lt = 12000)
 #' compareIHA(pre, post)
 #' compareIHA(pre, post, as.percent = TRUE, cl = TRUE)
 #'
 #' @export
 compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
-  if(!identical(sort(pre$paramters, post$parameters)))
+  if(!identical(sort(pre$parameters), sort(post$parameters)))
     stop("'pre' and 'post' analyses do not match.")
   post = post[match(pre$parameter, post$parameter),]
   ctendiff = post$central.tendency - pre$central.tendency
@@ -115,8 +116,13 @@ compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
   }
   res = data.frame(pre$parameter, ctendiff, dispdiff)
   if(cl){
-    #res["cl.upper"] = 
-    #res["cl.lower"] = 
+    if(is.null(attr(pre, "raw")) || is.null(attr(post, "raw")))
+      warning("Cannot compute confidence levels for outputs of ",
+        "IHA(..., keep.raw = FALSE).")
+    else{
+      #res["cl.upper"] = 
+      #res["cl.lower"] = 
+    }
   }
   res
 }

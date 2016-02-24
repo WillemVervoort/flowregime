@@ -29,8 +29,8 @@ Compare the results of two IHA analyses, e.g. pre- and post-impact periods.
 }
 \examples{
 data(siouxcity)
-pre = iha(siouxcity['2004/2009'], ut = 32000, lt = 12000)
-post = iha(siouxcity['2010/2014'], ut = 32000, lt = 12000)
+pre = IHA(siouxcity['2004/2009'], ut = 32000, lt = 12000)
+post = IHA(siouxcity['2010/2014'], ut = 32000, lt = 12000)
 compareIHA(pre, post)
 compareIHA(pre, post, as.percent = TRUE, cl = TRUE)
 

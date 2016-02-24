@@ -332,6 +332,7 @@ number_of_low_pulses = function(ts, lt, which = FALSE){
 #' @param ut The upper flow threshold above which to identify pulses.
 #' @return The mean duration of high flow pulses.
 #'
+#' mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
 #' @export
 mean_high_pulse_duration = function(ts, ut){
   if(any(is.na(ts)))
@@ -357,8 +358,7 @@ mean_high_pulse_duration = function(ts, ut){
 #'
 #' @examples
 #' data(siouxcity)
-#' mean_high_pulse_duration(siouxcity['2009'])
-#' mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
+#' mean_low_pulse_duration(siouxcity['2009'], lt = 12000)
 #'
 #' @export
 mean_low_pulse_duration = function(ts, lt){

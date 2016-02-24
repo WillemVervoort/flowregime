@@ -20,7 +20,7 @@
 #'   values. 
 #' @references Richter, B. D., Baumgartner, J. V., Powell, J. and Braun, D. P.
 #'   (1996), A Method for Assessing Hydrologic Alteration within Ecosystems.
-#'   Conservation Biology, 10: 1163–1174. doi: 10.1046/j.1523-1739.1996.10041163.x
+#'   Conservation Biology, 10: 1163-1174. doi: 10.1046/j.1523-1739.1996.10041163.x
 #'
 #' @examples
 #' data(siouxcity)

@@ -19,8 +19,7 @@ Compute the average duration of low flow pulses below a threshold.
 }
 \examples{
 data(siouxcity)
-mean_high_pulse_duration(siouxcity['2009'])
-mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
+mean_low_pulse_duration(siouxcity['2009'], lt = 12000)
 
 }
 

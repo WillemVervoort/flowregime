@@ -13,6 +13,8 @@ mean_high_pulse_duration(ts, ut)
 }
 \value{
 The mean duration of high flow pulses.
+
+mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
 }
 \description{
 Compute the average duration of high flow pulses above a threshold.

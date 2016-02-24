@@ -45,6 +45,6 @@ iha(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01",
 \references{
 Richter, B. D., Baumgartner, J. V., Powell, J. and Braun, D. P.
   (1996), A Method for Assessing Hydrologic Alteration within Ecosystems.
-  Conservation Biology, 10: 1163–1174. doi: 10.1046/j.1523-1739.1996.10041163.x
+  Conservation Biology, 10: 1163-1174. doi: 10.1046/j.1523-1739.1996.10041163.x
 }
 

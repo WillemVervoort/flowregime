@@ -4,15 +4,20 @@ Version: 0.4.0.9000
 Date: 2015-11-02
 Author: Michael C Koohafkan [aut, cre]
 Maintainer: Michael C Koohafkan <michael.koohafkan@gmail.com>
-Description: Compute environmental flow indicators from hydrologic time series. 
-    Defines functions for computing flow indicators such as time to rise, time 
-    to fall and days above/below a flow threshold. The package is designed to 
+Description: Compute environmental flow indicators from hydrologic time series.
+    Defines functions for computing flow indicators such as time to rise, time
+    to fall and days above/below a flow threshold. The package is designed to
     work with 'xts' objects.
 URL: https://github.com/mkoohafkan/flowregime
-BugReports: https://github.com/mkoohafkan/flowregime/issues 
+BugReports: https://github.com/mkoohafkan/flowregime/issues
 License: GPL (>= 3)
-Depends: R (>= 3.2.0), xts (>= 0.9-7)
-Imports: zoo (>= 1.7-12)
-Suggests: knitr
+Depends:
+    R (>= 3.2.0),
+    xts (>= 0.9-7)
+Imports:
+    zoo (>= 1.7-12)
+Suggests:
+    knitr
 VignetteBuilder: knitr
 LazyData: true
+RoxygenNote: 5.0.1

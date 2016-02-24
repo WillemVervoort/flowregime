@@ -136,13 +136,15 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
 #'
 #' @export
 high_flow_duration = function(ts, ut, which = FALSE){
+  if(any(is.na(ts)))
+    warning("NA values detected. Result may be erroneous.")
   pd = ts
   pd[ts < ut] = NA
   if(all(is.na(pd)))
     if(which)
       return(integer(0))
     else
-      return(NA)
+      return(0)
   m = na.contiguous(pd)
   if(which)
     index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
@@ -171,13 +173,15 @@ high_flow_duration = function(ts, ut, which = FALSE){
 #'
 #' @export
 low_flow_duration = function(ts, lt, which = FALSE){
+  if(any(is.na(ts)))
+    warning("NA values detected. Result may be erroneous.")
   pd = ts
   pd[ts > lt] = NA
   if(all(is.na(pd)))
     if(which)
       return(integer(0))
     else
-      return(NA)
+      return(0)
   m = na.contiguous(pd)
   if(which)
     index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
@@ -260,39 +264,31 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' 
 #' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold above which to identify peaks.
-#' @param ws The window size within which to detect peaks. Must be odd.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   peaks instead of the count.
 #' @return The number of peaks above the threshold.
 #'
-#' @details The method \code{rollapply} identifies peaks by testing whether the 
-#'   value at the center of the rolling window is the maximum value within the 
-#'   window. Larger windows can be used to essentially reduce the tolerance for 
-#'   what is considered a 'peak' in the presence of noise.
-#'
 #' @examples
 #' data(siouxcity)
-#' number_of_high_pulses(siouxcity['2009'])
-#' number_of_high_pulses(siouxcity['2009'], which = TRUE)
-#' number_of_high_pulses(siouxcity['2009'], ws = 7, which = TRUE)
-#' number_of_high_pulses(siouxcity['2009'], ws = 7, ut = 32000)
+#' number_of_high_pulses(siouxcity['2009'], ut = 32000)
+#' number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE)
 #'
 #' @export
-number_of_high_pulses = function(ts, ut = 0, ws = 3, which = FALSE){
-  if(as.integer(ws) != ws){
-    warning("Rounding argument 'ws' to nearest integer.")
-    ws = round(ws)
-  }
-  if(ws < 1 | ws %% 2 == 0)
-    stop("Argument 'ws' must be an odd positive integer.")    
-  mid = (ws - 1) %/% 2 + 1
-  peaks = as.logical(coredata(rollapply(ts, ws, function(x) 
-    which.max(x) == mid, align = "center", fill = FALSE, by.column = TRUE)))
-  peaks[ts < ut] = FALSE
+number_of_high_pulses = function(ts, ut, which = FALSE){
+  if(any(is.na(ts)))
+    warning("NA values detected. Result may be erroneous.")
+  pd = ts
+  pd[ts < ut] = NA
+  if(all(is.na(pd)))
+    return(NA)
+  idx <- 1 + cumsum(is.na(coredata(pd)))
+  not.na <- !is.na(coredata(pd))
+  pulses = split(index(pd)[not.na], idx[not.na])
+  pulselocs = sapply(pulses, which.max)
   if(which)
-    index(ts)[peaks]
+    index(ts)[pulselocs]
   else
-    sum(peaks, na.rm = TRUE)
+    length(pulselocs)
 }
 
 #' Number of Low Flow Pulses
@@ -301,39 +297,31 @@ number_of_high_pulses = function(ts, ut = 0, ws = 3, which = FALSE){
 #' 
 #' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold below which to identify pulses.
-#' @param ws The window size within which to detect pulses. Must be odd.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   pulses instead of the count.
 #' @return The number of pulses below the threshold.
 #'
-#' @details The method \code{rollapply} identifies pulses by testing whether the 
-#'   value at the center of the rolling window is the minimum value within the 
-#'   window. Larger windows can be used to essentially reduce the tolerance for 
-#'   what is considered a 'pulse' in the presence of noise.
-#'
 #' @examples
 #' data(siouxcity)
-#' number_of_low_pulses(siouxcity['2009'])
-#' number_of_low_pulses(siouxcity['2009'], which = TRUE)
-#' number_of_low_pulses(siouxcity['2009'], ws = 7, which = TRUE)
-#' number_of_low_pulses(siouxcity['2009'], ws = 7, ut = 32000)
+#' number_of_low_pulses(siouxcity['2009'], lt = 12000)
+#' number_of_low_pulses(siouxcity['2009'], lt = 12000, which = TRUE)
 #'
 #' @export
-number_of_low_pulses = function(ts, lt = 0, ws = 3, which = FALSE){
-  if(as.integer(ws) != ws){
-    warning("Rounding argument 'ws' to nearest integer.")
-    ws = round(ws)
-  }
-  if(ws < 1 | ws %% 2 == 0)
-    stop("Argument 'ws' must be an odd positive integer.")    
-  mid = (ws - 1) %/% 2 + 1
-  peaks = as.logical(coredata(rollapply(ts, ws, function(x) 
-    which.min(x) == mid, align = "center", fill = FALSE, by.column = TRUE)))
-  peaks[ts > lt] = FALSE
+number_of_low_pulses = function(ts, lt, which = FALSE){
+  if(any(is.na(ts)))
+    warning("NA values detected. Result may be erroneous.")
+  pd = ts
+  pd[ts > lt] = NA
+  if(all(is.na(pd)))
+    return(NA)
+  idx <- 1 + cumsum(is.na(coredata(pd)))
+  not.na <- !is.na(coredata(pd))
+  pulses = split(index(pd)[not.na], idx[not.na])
+  pulselocs = sapply(pulses, which.min)
   if(which)
-    index(ts)[peaks]
+    index(ts)[pulselocs]
   else
-    sum(peaks, na.rm = TRUE)
+    length(pulselocs)
 }
 
 #' Mean Duration of High Flow Pulses
@@ -346,10 +334,12 @@ number_of_low_pulses = function(ts, lt = 0, ws = 3, which = FALSE){
 #'
 #' @export
 mean_high_pulse_duration = function(ts, ut){
+  if(any(is.na(ts)))
+    warning("NA values detected. Result may be erroneous.")
   pd = ts
   pd[ts < ut] = NA
   if(all(is.na(pd)))
-    return(NA)
+    return(0)
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
@@ -372,10 +362,12 @@ mean_high_pulse_duration = function(ts, ut){
 #'
 #' @export
 mean_low_pulse_duration = function(ts, lt){
+  if(any(is.na(ts)))
+    warning("NA values detected. Result may be erroneous.")
   pd = ts
   pd[ts > lt] = NA
   if(all(is.na(pd)))
-    return(NA)
+    return(0)
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
@@ -388,8 +380,8 @@ mean_low_pulse_duration = function(ts, lt){
 #' Compute the number of days for which flow is zero (to some tolerance).
 #'
 #' @param ts A time series of class \code{xts}.
-#' @param tol A tolerance factor below which flows are considered of negligible 
-#'   magntiude. 
+#' @param tol A tolerance factor. Flows less than \code{tol} are considered to 
+#'   be essentially zero. 
 #' @return The number of no-flow days.
 #'
 #' @examples

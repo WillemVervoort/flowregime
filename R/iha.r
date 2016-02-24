@@ -13,8 +13,14 @@
 #'   recommends the 75th flow percentile for pre-impact conditions.
 #' @param lt The lower flow threshold for identifying low flow pulses. IHA 
 #'   recommends the 25th flow percentile for pre-impact conditions.
-#' @return A two-column dataframe containing the IHA parameter names 
-#'   (\code{parameters}) and computed values (\code{values}).
+#' @param stats Logical: If \code{TRUE}, return the inter-annual statistics 
+#'   of each parameter. Otherwise, return the hydrologic attributes for each 
+#'   year of record. 
+#' @return A 3-column dataframe. If \code{stat = TRUE}, the dataframe contains 
+#'   the parameter names, the central tendencies and the measures of 
+#'   dispersion. If \code{stat = FALSE}, the dataframe contains the parameter 
+#'   names, the value of the attribute and the year of record (YoR) for which 
+#'   the attribute was computed.
 #'
 #' @details The IHA method requires a regular time series with no missing 
 #'   values. 
@@ -24,13 +30,14 @@
 #'
 #' @examples
 #' data(siouxcity)
-#' iha(siouxcity['2009/2011'], ut = 32000, lt = 12000)
-#' iha(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
+#' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000)
+#' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, stats = FALSE)
+#' IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
 #'   yearend = "09-30", ut = 32000, lt = 12000)
 #'
 #' @export
-iha = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
-  ut, lt){
+IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
+  ut, lt, stats = TRUE){
   # argument checking
   if(yearstart == yearend)
     stop("Arguments 'yearstart' and 'yearend' must be different")
@@ -54,13 +61,65 @@ iha = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
     r = pd[n]
     res = list(group1(r), group2(r), group3(r), group4(r, ut, lt), group5(r))
     records[[n]] = do.call(rbind.data.frame, res[groups])
-    records[[n]]["period"] = n
+    records[[n]]["YoR"] = n
   }
   res = do.call(rbind.data.frame, records)
   rownames(res) = NULL
-  res
+  if(!stats)
+    return(res)
+  # compute stats for each group
+  pnames = unique(res$parameter)
+  pcentral = setNames(vector("numeric", length(pnames)), pnames)
+  pdispersion = pcentral
+  for(p in pnames){
+    pcentral[[p]] = mean(res[res$parameter == p, "value"])
+    pdispersion[[p]] = sd(res[res$parameter == p, "value"])/pcentral[[p]]
+  }
+  data.frame(parameter = pnames, central.tendency = pcentral, 
+    dispersion = pdispersion, row.names = NULL)  
 }
 
+#' Compare IHA Results
+#'
+#' Compare the results of two IHA analyses, e.g. pre- and post-impact periods.
+#'
+#' @param pre The pre-impact IHA statistics, i.e. the output of 
+#'   \code{IHA(..., stat = TRUE)}.
+#' @param post The post-impact IHA statistics.
+#' @param as.percent If \code{TRUE}, return the differences as a relative 
+#'   percent difference (\code{(post - pre)/pre}). Otherwise, return the 
+#'   magnitude of difference.
+#' @param cl Logical: If \code{TRUE}, compute confidence limits for each 
+#'   parameter.
+#' @return a dataframe containing either the magnitude of difference or 
+#'   relative percent difference of each parameter, and (optionally) the upper
+#'   and lowe confidence intervals.
+#'
+#' @examples
+#' data(siouxcity)
+#' pre = iha(siouxcity['2004/2009'], ut = 32000, lt = 12000)
+#' post = iha(siouxcity['2010/2014'], ut = 32000, lt = 12000)
+#' compareIHA(pre, post)
+#' compareIHA(pre, post, as.percent = TRUE, cl = TRUE)
+#'
+#' @export
+compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
+  if(!identical(sort(pre$paramters, post$parameters)))
+    stop("'pre' and 'post' analyses do not match.")
+  post = post[match(pre$parameter, post$parameter),]
+  ctendiff = post$central.tendency - pre$central.tendency
+  dispdiff = post$dispersion - pre$dispersion
+  if(as.percent){
+    ctendiff = 100*ctendiff/pre$central.tendency
+    dispdiff = 100*dispdiff/pre$dispersion
+  }
+  res = data.frame(pre$parameter, ctendiff, dispdiff)
+  if(cl){
+    #res["cl.upper"] = 
+    #res["cl.lower"] = 
+  }
+  res
+}
 
 group1 = function(r){
   mnths = unique(format(index(r), "%b"))

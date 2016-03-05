@@ -143,8 +143,8 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
 #'
 #' @examples
 #' data(siouxcity)
-#' high_flow_duration(siouxcity['2011'], 70000)
-#' high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
+#' longest_high_flow_duration(siouxcity['2011'], 70000)
+#' longest_high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
 #'
 #' @export
 longest_high_flow_duration = function(ts, ut, which = FALSE){
@@ -180,8 +180,8 @@ longest_high_flow_duration = function(ts, ut, which = FALSE){
 #'
 #' @examples
 #' data(siouxcity)
-#' low_flow_duration(siouxcity['2006-06/2007-06'], 18000)
-#' low_flow_duration(siouxcity['2006-06/2007-06'], 18000, which = TRUE)
+#' longest_low_flow_duration(siouxcity['2006-06/2007-06'], 18000)
+#' longest_low_flow_duration(siouxcity['2006-06/2007-06'], 18000, which = TRUE)
 #'
 #' @export
 longest_low_flow_duration = function(ts, lt, which = FALSE){
@@ -350,7 +350,10 @@ number_of_low_pulses = function(ts, lt, min.dur = NA, which = FALSE){
 #' @param ut The upper flow threshold above which to identify pulses.
 #' @return The mean duration of high flow pulses.
 #'
+#' @examples
+#' data(siouxcity)
 #' mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
+#'
 #' @export
 mean_high_pulse_duration = function(ts, ut){
   if(any(is.na(ts)))

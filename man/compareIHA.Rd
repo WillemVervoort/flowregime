@@ -20,7 +20,7 @@ magnitude of difference.}
 parameter.}
 }
 \value{
-a dataframe containing either the magnitude of difference or 
+A dataframe containing either the magnitude of difference or 
   relative percent difference of each parameter, and (optionally) the upper
   and lowe confidence intervals.
 }

@@ -46,20 +46,23 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
     if(missing(ut) | missing(lt))
       stop("Arguments 'ut' and 'lt' are required to compute group 4")
   }
-  ## check that time series is regular
+  # check that time series is regular
   pd = ts
   # define water years
   startidx = index(pd)[which(format(index(pd), "%m-%d") == yearstart)]
   endidx = index(pd)[which(format(index(pd), "%m-%d") == yearend)]
   if(length(startidx) != length(endidx))
-    stop("Flow record is incomplete.")
+    stop("Flow record is incomplete")
   sets = paste(startidx, endidx, sep = "/")
+  # define groups to compute
+  groupfuns = list(group1, group2, group3, function(x) group4(x, ut, lt), 
+    group5)[groups]
   # calculate groups for each year in record
   records = setNames(vector('list', length(sets)), sets)
   for(n in names(records)){
     r = pd[n]
-    res = list(group1(r), group2(r), group3(r), group4(r, ut, lt), group5(r))
-    records[[n]] = do.call(rbind.data.frame, res[groups])
+    res = lapply(groupfuns, function(fun) fun(r))
+    records[[n]] = do.call(rbind.data.frame, res)
     records[[n]]["YoR"] = n
   }
   res = do.call(rbind.data.frame, records)
@@ -72,12 +75,76 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
     pcentral[[p]] = mean(res[res$parameter == p, "value"])
     pdispersion[[p]] = sd(res[res$parameter == p, "value"])/pcentral[[p]]
   }
+  # fix for circular stats
+  for(p in c("minima JD", "maxima JD")){
+    pcentral[[p]] = circ_stat(res[res$parameter == p, "value"], mean)
+    pdispersion[[p]] = circ_stat(res[res$parameter == p, "value"], sd)/pcentral[[p]]
+}
   res2 = data.frame(parameter = pnames, central.tendency = pcentral, 
     dispersion = pdispersion, row.names = NULL)  
   if(keep.raw)
     structure(res2, raw = res)
   else
     res2
+}
+
+group1 = function(r){
+  mnths = unique(format(index(r), "%b"))
+  res = sapply(mnths, function(x) 
+    mean(coredata(r)[which(format(index(r), "%b") == x)]))
+  data.frame(parameter = paste0("mean (", mnths, ")"), value = res, 
+    row.names = NULL)
+}
+
+group2 = function(r){
+  rollnums = c(1, 3, 7, 30, 90)
+  minima = vector("numeric", length = length(rollnums))
+  maxima = vector("numeric", length = length(rollnums))
+  names(minima) = paste0(rollnums, "-day minima")
+  names(maxima) = paste0(rollnums, "-day maxima")
+  for(i in seq_along(rollnums)){
+    rollr = rollapply(r, rollnums[i], mean, align = "center", fill = NULL)
+    minima[[i]] = min(coredata(rollr))
+    maxima[[i]] = max(coredata(rollr))
+  }
+  res = c(minima, maxima)
+  data.frame(parameter = names(res), value = res, row.names = NULL)
+}
+
+group3 = function(r){
+  max1 = format(index(r)[which.max(coredata(r))], "%m-%d")
+  min1 = format(index(r)[which.min(coredata(r))], "%m-%d")
+  jds = setNames(seq(1:366), format(seq(as.Date("2004-01-01"), 
+    as.Date("2004-12-31"), by = "1 day"), "%m-%d"))
+  max1 = jds[[which(max1 == names(jds))]]
+  min1 = jds[[which(min1 == names(jds))]]
+  data.frame(parameter = c("minima JD", "maxima JD"), value = c(min1, max1))
+}
+
+group4 = function(r, ut, lt){
+  hp = number_of_high_pulses(r, ut, which = FALSE)
+  lp = number_of_low_pulses(r, lt, which = FALSE)
+  hpd = mean_high_pulse_duration(r, ut)
+  lpd = mean_low_pulse_duration(r, lt)
+  res = c("no. low pulses" = lp, "mean low pulse duration" = lpd, 
+    "no. high pulses" = hp, "mean high pulse duration" = hpd)
+  data.frame(parameter = names(res), value = res, row.names = NULL)
+  
+}
+
+group5 = function(r){
+  diffs = tail(diff(r), -1)
+  whichpos = which(diffs > 0)
+  whichneg = which(diffs < 0)
+  meanpos = mean(diffs[whichpos])
+  meanneg = mean(diffs[whichneg])
+  reversalfun = function(x)
+    ifelse(((x[2] > x[1]) && (x[3] < x[2])) || (x[2] < x[1]) && (x[3] > x[2]), 
+      TRUE, FALSE)
+  reversals = sum(rollapply(r, 3, reversalfun, align = "right", fill = NULL))
+  res = c("mean rise rate" = meanpos, "mean fall rate" = meanneg, 
+    "no. reversals" = reversals)
+  data.frame(parameter = names(res), value = res, row.names = NULL)
 }
 
 #' Compare IHA Results
@@ -92,7 +159,7 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
 #'   magnitude of difference.
 #' @param cl Logical: If \code{TRUE}, compute confidence limits for each 
 #'   parameter.
-#' @return a dataframe containing either the magnitude of difference or 
+#' @return A dataframe containing either the magnitude of difference or 
 #'   relative percent difference of each parameter, and (optionally) the upper
 #'   and lowe confidence intervals.
 #'
@@ -127,54 +194,43 @@ compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
   res
 }
 
-group1 = function(r){
-  mnths = unique(format(index(r), "%b"))
-  res = sapply(mnths, function(x) 
-    mean(coredata(r)[which(format(index(r), "%b") == x)]))
-  data.frame(parameter = paste0("mean (", mnths, ")"), value = res, 
-    row.names = NULL)
-}
 
-group2 = function(r, rollnums = c(1, 3, 7, 30, 90)){
-  minima = vector("numeric", length = length(rollnums))
-  maxima = vector("numeric", length = length(rollnums))
-  names(minima) = paste0(rollnums, "-day minima")
-  names(maxima) = paste0(rollnums, "-day maxima")
-  for(i in seq_along(rollnums)){
-    rollr = rollapply(r, rollnums[i], mean, align = "center", fill = NULL)
-    minima[[i]] = min(coredata(rollr))
-    maxima[[i]] = max(coredata(rollr))
+date_stat = function(v, statfun, yearstart, yearend){
+  starti = as.integer(substring(yearstart, 1, 2))
+  endi = as.integer(substring(yearend, 1, 2)) 
+  vmon = as.integer(substring(v, 1,2))
+  if(starti > endi){
+    # water year
+    vdates = c(
+      as.Date(paste0("0003-", v[vmon >= starti])),
+      as.Date(paste0("0004-", v[vmon <= endi]))
+    )
+  } else {
+    vdates = as.Date(paste("0000-", v))
   }
-  res = c(minima, maxima)
-  data.frame(parameter = names(res), value = res, row.names = NULL)
+  statfun(vdates)
 }
 
-group3 = function(r){
-  max1 = as.POSIXlt(format(index(r)[which.max(coredata(r))], "%Y-%m-%d"))$yday
-  min1 = as.POSIXlt(format(index(r)[which.min(coredata(r))], "%Y-%m-%d"))$yday
-  data.frame(parameter = c("maxima JD", "minima JD"), value = c(max1,  min1))
-}
 
-group4 = function(r, ut, lt){
-  hp = number_of_high_pulses(r, ut, which = FALSE)
-  lp = number_of_low_pulses(r, lt, which = FALSE)
-  hpd = mean_high_pulse_duration(r, ut)
-  lpd = mean_low_pulse_duration(r, lt)
-  res = c("no. high pulses" = hp, "no. low pulses" = lp, 
-    "mean high pulse duration" = hpd, "mean low pulse duration" = lpd)
-  data.frame(parameter = names(res), value = res, row.names = NULL)
-  
-}
-
-group5 = function(r){
-  diffs = tail(diff(r), -1)
-  whichpos = which(diffs > 0)
-  whichneg = which(diffs < 0)
-  meanpos = mean(diffs[whichpos])
-  meanneg = mean(diffs[whichneg])
-  numpos = length(whichpos)
-  numneg = length(whichneg)
-  res = c("no. of rises" = numpos, "no. of falls" = numneg, 
-    "mean rise rate" = meanpos, "mean fall rate" = meanneg)
-  data.frame(parameter = names(res), value = res, row.names = NULL)
+circ_stat = function(v, statfun){
+  q1bin = v < 92
+  q2bin = (v > 91) && (v < 184)
+  q3bin = (v > 183) && (v < 276)
+  q4bin = v > 275
+  whichbin = which.max(c(q1bin, q2bin, q3bin, q4bin))
+  if(whichbin == 1 & (q3bin >= 0.1*length(v) || q4bin >= 0.1*length(v))){
+    warning("spread")
+  }
+  if(whichbin %in% c(2, 3)){
+    res = statfun(v)
+  } else if(whichbin == 1){
+    v[q4bin] = v[q4bin] - 366
+    res = statfun(v)
+    res = ifelse(res < 0, res + 366, res)
+  } else {
+    v[q1bin] = v[q1bin] + 366
+    res = statfun(v)
+    res = ifelse(res > 366, res - 366, res)
+  }
+  res
 }

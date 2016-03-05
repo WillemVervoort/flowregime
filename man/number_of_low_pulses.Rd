@@ -4,12 +4,14 @@
 \alias{number_of_low_pulses}
 \title{Number of Low Flow Pulses}
 \usage{
-number_of_low_pulses(ts, lt, which = FALSE)
+number_of_low_pulses(ts, lt, min.dur = NA, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold below which to identify pulses.}
+
+\item{min.dur}{The minimum duration required for a pulse to be counted.}
 
 \item{which}{Logical: If \code{TRUE}, return the index locations of the 
 pulses instead of the count.}

@@ -2,8 +2,8 @@
 
 export(IHA)
 export(compareIHA)
-export(high_flow_duration)
-export(low_flow_duration)
+export(longest_high_flow_duration)
+export(longest_low_flow_duration)
 export(mean_high_pulse_duration)
 export(mean_low_pulse_duration)
 export(number_of_high_pulses)

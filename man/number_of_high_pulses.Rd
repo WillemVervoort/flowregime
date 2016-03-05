@@ -4,12 +4,14 @@
 \alias{number_of_high_pulses}
 \title{Number of High Flow Pulses}
 \usage{
-number_of_high_pulses(ts, ut, which = FALSE)
+number_of_high_pulses(ts, ut, min.dur = NA, which = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{ut}{The upper flow threshold above which to identify peaks.}
+
+\item{min.dur}{The minimum duration required for a pulse to be counted.}
 
 \item{which}{Logical: If \code{TRUE}, return the index locations of the 
 peaks instead of the count.}

@@ -20,6 +20,18 @@ NULL
 #' @format An \code{xts} object.
 NULL
 
+#' Roanoke River Flows at Roanoke Rapids, NC
+#' 
+#' Roanoke River daily discharge recorded at USGS gauge 02080500 in 
+#'   Roanoke Rapids, NC from 1913-01-01 to 1991-12-31.
+#' @docType data
+#' @keywords datasets
+#' @name roanokerapids
+#' @usage data(roanokerapids)
+#' @format An \code{xts} object.
+NULL
+
+
 #' Time To Rise
 #'
 #' Compute the time for flow to rise up to or above a given threshold.
@@ -116,7 +128,7 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
     index(ts)[low] - index(ts)[high]
 }
 
-#' High Flow Duration
+#' Longest High Flow Duration
 #'
 #' Compute the longest continuous period during which flow is 
 #'   at or above a given threshold.
@@ -135,7 +147,7 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
 #' high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
 #'
 #' @export
-high_flow_duration = function(ts, ut, which = FALSE){
+longest_high_flow_duration = function(ts, ut, which = FALSE){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   pd = ts
@@ -153,7 +165,7 @@ high_flow_duration = function(ts, ut, which = FALSE){
     tail(index(m), 1) - head(index(m), 1)
 }
 
-#' Low Flow Duration
+#' Longest Low Flow Duration
 #'
 #' Compute the longest continuous period during which flow is 
 #'   at or below a given threshold.
@@ -172,7 +184,7 @@ high_flow_duration = function(ts, ut, which = FALSE){
 #' low_flow_duration(siouxcity['2006-06/2007-06'], 18000, which = TRUE)
 #'
 #' @export
-low_flow_duration = function(ts, lt, which = FALSE){
+longest_low_flow_duration = function(ts, lt, which = FALSE){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   pd = ts
@@ -264,6 +276,7 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' 
 #' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold above which to identify peaks.
+#' @param min.dur The minimum duration required for a pulse to be counted.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   peaks instead of the count.
 #' @return The number of peaks above the threshold.
@@ -274,16 +287,18 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE)
 #'
 #' @export
-number_of_high_pulses = function(ts, ut, which = FALSE){
+number_of_high_pulses = function(ts, ut, min.dur = NA, which = FALSE){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   pd = ts
   pd[ts < ut] = NA
   if(all(is.na(pd)))
-    return(NA)
+    return(0)
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
+  if(!is.na(min.dur))
+    pulses = pulses[sapply(pulses, function(x) max(x) - min(x) >= min.dur)]
   pulselocs = sapply(pulses, which.max)
   if(which)
     index(ts)[pulselocs]
@@ -297,6 +312,7 @@ number_of_high_pulses = function(ts, ut, which = FALSE){
 #' 
 #' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold below which to identify pulses.
+#' @param min.dur The minimum duration required for a pulse to be counted.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   pulses instead of the count.
 #' @return The number of pulses below the threshold.
@@ -307,21 +323,23 @@ number_of_high_pulses = function(ts, ut, which = FALSE){
 #' number_of_low_pulses(siouxcity['2009'], lt = 12000, which = TRUE)
 #'
 #' @export
-number_of_low_pulses = function(ts, lt, which = FALSE){
+number_of_low_pulses = function(ts, lt, min.dur = NA, which = FALSE){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   pd = ts
-  pd[ts > lt] = NA
+  pd[ts >= lt] = NA
   if(all(is.na(pd)))
-    return(NA)
+    return(0)
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
-  pulselocs = sapply(pulses, which.min)
-  if(which)
+  if(!is.na(min.dur))
+    pulses = pulses[sapply(pulses, function(x) max(x) - min(x) >= min.dur)]
+  if(which){
+    pulselocs = sapply(pulses, which.min)
     index(ts)[pulselocs]
-  else
-    length(pulselocs)
+  } else
+    length(pulses)
 }
 
 #' Mean Duration of High Flow Pulses
@@ -337,6 +355,11 @@ number_of_low_pulses = function(ts, lt, which = FALSE){
 mean_high_pulse_duration = function(ts, ut){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
+  interval = diff(index(ts))
+  if(length(unique(interval)) > 1){
+    warning("time series is irregular. Results may be erroneous.")
+  }
+  interval = interval[[1]]
   pd = ts
   pd[ts < ut] = NA
   if(all(is.na(pd)))
@@ -344,7 +367,7 @@ mean_high_pulse_duration = function(ts, ut){
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
-  pulselengths = sapply(pulses, function(x) max(x) - min(x))
+  pulselengths = sapply(pulses, function(x) interval + max(x) - min(x))
   mean(pulselengths)
 }
 
@@ -364,6 +387,10 @@ mean_high_pulse_duration = function(ts, ut){
 mean_low_pulse_duration = function(ts, lt){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
+  interval = diff(index(ts))
+  if(length(unique(interval)) > 1)
+    warning("time series is irregular. Results may be erroneous.")
+  interval = interval[[1]]
   pd = ts
   pd[ts > lt] = NA
   if(all(is.na(pd)))
@@ -371,7 +398,7 @@ mean_low_pulse_duration = function(ts, lt){
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
-  pulselengths = sapply(pulses, function(x) max(x) - min(x))
+  pulselengths = sapply(pulses, function(x) interval + max(x) - min(x))
   mean(pulselengths)
 }
 

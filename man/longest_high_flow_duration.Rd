@@ -25,8 +25,8 @@ Compute the longest continuous period during which flow is
 }
 \examples{
 data(siouxcity)
-high_flow_duration(siouxcity['2011'], 70000)
-high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
+longest_high_flow_duration(siouxcity['2011'], 70000)
+longest_high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
 
 }
 

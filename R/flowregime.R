@@ -426,3 +426,96 @@ number_of_no_flow_days = function(ts, tol = 0){
   length(unique(format(index(noflow), "%Y-%m-%d")))
 }
 
+#' Average Minimum Flow
+#'
+#' Compute the n-average minimum flow.
+#'
+#' @param ts A time series of class \code{xts}. Assumes a regular timeseries.
+#' @param n The moving-window size.
+#' @param which Logical: If \code{TRUE}, return the index location of the 
+#'   n-average minimum flow instead of the flow magnitude.
+#' @param return The n-average minimum flow.
+#' 
+#' @examples
+#' @data(siouxcity)
+#' average_minimum_flow(siouxcity['2009'], 1)
+#' average_minimum_flow(siouxcity['2009'], 7)
+#' average_minimum_flow(siouxcity['2009'], 90, which = TRUE)
+#'
+#' @export
+average_minimum_flow = function(ts, n = 1, which = FALSE){
+  if(n < 1 || n != round(n))
+    stop("argument 'n' must be a positive integer")
+  if(length(index(ts)) < n){
+    warning("window size 'n' exceeds length of 'ts'. Returning NA")
+    return(NA)
+  }
+  durflow = rollapply(ts, n, mean, align = "center", fill = NULL)
+  if(which)
+    index(durflow)[which.min(durflow)]
+  else
+    coredata(durflow)[which.min(durflow)]
+}
+
+#' Average Maximum Flow
+#'
+#' Compute the n-average maximum flow.
+#'
+#' @param ts A time series of class \code{xts}. Assumes a regular timeseries.
+#' @param n The moving-window size.
+#' @param which Logical: If \code{TRUE}, return the index location of the 
+#'   n-average maximum flow instead of the flow magnitude.
+#' @param return The n-average maximum flow.
+#' 
+#' @examples
+#' @data(siouxcity)
+#' average_maximum_flow(siouxcity['2009'], 1)
+#' average_maximum_flow(siouxcity['2009'], 7)
+#' average_maximum_flow(siouxcity['2009'], 90, which = TRUE)
+#'
+#' @export
+average_maximum_flow = function(ts, n = 1, which = FALSE){
+  if(n < 1 || n != round(n))
+    stop("argument 'n' must be a positive integer")
+  if(length(index(ts)) < n){
+    warning("window size 'n' exceeds length of 'ts'. Returning NA")
+    return(NA)
+  }
+  durflow = rollapply(ts, n, mean, align = "center", fill = NULL)
+  if(which)
+    index(durflow)[which.max(durflow)]
+  else
+    coredata(durflow)[which.max(durflow)]
+}
+
+#' Number Of Flow Reversals
+#'
+#' Compute the number of times that the flow rate of change reverses.
+#'
+#' @param ts A time series of class \code{xts}. Assumes a regular timeseries.
+#' @param which Logical: If \code{TRUE}, return the index location of the 
+#'   flow reversals instead of the total number of reversals.
+#' @param return The total number of flow reversals.
+#' 
+#' @examples
+#' @data(siouxcity)
+#' number_of_reversals(siouxcity['2009-01'])
+#' number_of_reversals(siouxcity['2009-01'], which = TRUE)
+#'
+#' @export
+number_of_reversals = function(ts, which = FALSE){
+  if(length(index(ts)) < 3){
+    warning("Argument 'ts' has less than 3 data points. Returning NA")
+    return(NA)
+  }
+  revfun = function(x) 
+    ifelse(all(c(x[[1]], x[[3]]) < x[[2]]) | all(c(x[[1]], x[[3]]) > x[[2]]), 
+      TRUE, FALSE)
+  revflow = as.logical(coredata(rollapply(ts, 3, revfun, align = 'right', 
+    fill = FALSE)))
+  if(which)
+    index(ts)[revflow]
+  else
+    sum(revflow)  
+}
+

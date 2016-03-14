@@ -194,31 +194,14 @@ compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
   res
 }
 
-
-date_stat = function(v, statfun, yearstart, yearend){
-  starti = as.integer(substring(yearstart, 1, 2))
-  endi = as.integer(substring(yearend, 1, 2)) 
-  vmon = as.integer(substring(v, 1,2))
-  if(starti > endi){
-    # water year
-    vdates = c(
-      as.Date(paste0("0003-", v[vmon >= starti])),
-      as.Date(paste0("0004-", v[vmon <= endi]))
-    )
-  } else {
-    vdates = as.Date(paste("0000-", v))
-  }
-  statfun(vdates)
-}
-
-
+# circular statistics for IHA
 circ_stat = function(v, statfun){
   q1bin = v < 92
   q2bin = (v > 91) && (v < 184)
   q3bin = (v > 183) && (v < 276)
   q4bin = v > 275
   whichbin = which.max(c(q1bin, q2bin, q3bin, q4bin))
-  if(whichbin == 1 & (q3bin >= 0.1*length(v) || q4bin >= 0.1*length(v))){
+  if(whichbin == 1 & ((sum(q3bin) >= 0.1*length(v)) || (sum(q4bin) >= 0.1*length(v)))){
     warning("spread")
   }
   if(whichbin %in% c(2, 3)){

@@ -4,7 +4,7 @@
 \alias{RVA}
 \title{IHA Range of Variability Approach}
 \usage{
-RVA(pre, post, boundaries)
+RVA(pre, post, boundaries, parametric = TRUE)
 }
 \description{
 Compute the IHA Range of Variability.

@@ -34,8 +34,6 @@ Compute the number of high flow pulses (peaks) above a threshold.
 data(siouxcity)
 number_of_high_pulses(siouxcity['2009'], ut = 32000)
 number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE)
-number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE, 
-  return.which = "max")
 
 }
 

@@ -288,8 +288,6 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' data(siouxcity)
 #' number_of_high_pulses(siouxcity['2009'], ut = 32000)
 #' number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE)
-#' number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE, 
-#'   return.which = "max")
 #'
 #' @export
 number_of_high_pulses = function(ts, ut, min.dur = NA, ignore.first = FALSE,

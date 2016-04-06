@@ -4,12 +4,15 @@
 \alias{mean_high_pulse_duration}
 \title{Mean Duration of High Flow Pulses}
 \usage{
-mean_high_pulse_duration(ts, ut)
+mean_high_pulse_duration(ts, ut, ignore.first = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{ut}{The upper flow threshold above which to identify pulses.}
+
+\item{ignore.first}{Logical: Ignore the first pulse if it occurs at the
+start of record.}
 }
 \value{
 The mean duration of high flow pulses.

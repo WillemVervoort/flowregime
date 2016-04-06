@@ -4,7 +4,8 @@
 \alias{number_of_high_pulses}
 \title{Number of High Flow Pulses}
 \usage{
-number_of_high_pulses(ts, ut, min.dur = NA, which = FALSE)
+number_of_high_pulses(ts, ut, min.dur = NA, ignore.first = FALSE,
+  which = FALSE, return.which = c("first", "last", "max"))
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -13,8 +14,15 @@ number_of_high_pulses(ts, ut, min.dur = NA, which = FALSE)
 
 \item{min.dur}{The minimum duration required for a pulse to be counted.}
 
+\item{ignore.first}{Logical: Ignore the first pulse if it occurs at the
+start of record.}
+
 \item{which}{Logical: If \code{TRUE}, return the index locations of the 
 peaks instead of the count.}
+
+\item{return.which}{For each pulse, return the index corresponding to the 
+start of the pulse (\code{"first"}), end of the pulse (\code{"last"}), or
+occurrence of the maximum value (\code{"max"}).}
 }
 \value{
 The number of peaks above the threshold.
@@ -26,6 +34,8 @@ Compute the number of high flow pulses (peaks) above a threshold.
 data(siouxcity)
 number_of_high_pulses(siouxcity['2009'], ut = 32000)
 number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE)
+number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE, 
+  return.which = "max")
 
 }
 

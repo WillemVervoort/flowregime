@@ -4,12 +4,15 @@
 \alias{mean_low_pulse_duration}
 \title{Mean Duration of Low Flow Pulses}
 \usage{
-mean_low_pulse_duration(ts, lt)
+mean_low_pulse_duration(ts, lt, ignore.first = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
 
 \item{lt}{The lower flow threshold below which to identify pulses.}
+
+\item{ignore.first}{Logical: Ignore the first pulse if it occurs at the
+start of record.}
 }
 \value{
 The mean duration of high flow pulses.

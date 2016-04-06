@@ -4,7 +4,8 @@
 \alias{number_of_low_pulses}
 \title{Number of Low Flow Pulses}
 \usage{
-number_of_low_pulses(ts, lt, min.dur = NA, which = FALSE)
+number_of_low_pulses(ts, lt, min.dur = NA, ignore.first = FALSE,
+  which = FALSE, return.which = c("first", "last", "min"))
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -13,8 +14,15 @@ number_of_low_pulses(ts, lt, min.dur = NA, which = FALSE)
 
 \item{min.dur}{The minimum duration required for a pulse to be counted.}
 
+\item{ignore.first}{Logical: Ignore the first pulse if it occurs at the
+start of record.}
+
 \item{which}{Logical: If \code{TRUE}, return the index locations of the 
 pulses instead of the count.}
+
+\item{return.which}{For each pulse, return the index corresponding to the 
+start of the pulse (\code{"first"}), end of the pulse (\code{"last"}), or
+occurrence of the minimum value (\code{"min"}).}
 }
 \value{
 The number of pulses below the threshold.

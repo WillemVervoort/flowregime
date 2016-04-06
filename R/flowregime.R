@@ -230,8 +230,7 @@ total_time_above_threshold = function(ts, ut, which = FALSE){
     return(0)
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
-    warning("Time series is irregular. Total time calculation ",
-      "may be erroneous.")
+    warning("Time series is irregular. Result may be erroneous.")
   dt = as.difftime(c(dt, dt[length(dt)]), units = units(dt))
   sum(dt[d])
 }
@@ -264,8 +263,7 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
     return(0)
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
-    warning("Time series is irregular. Total time calculation ",
-      "may be erroneous.")
+    warning("Time series is irregular. Result may be erroneous.")
   dt = as.difftime(c(dt, dt[length(dt)]), units = units(dt))
   sum(dt[d])
 }
@@ -277,17 +275,26 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
 #' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold above which to identify peaks.
 #' @param min.dur The minimum duration required for a pulse to be counted.
+#' @param ignore.first Logical: Ignore the first pulse if it occurs at the
+#'   start of record.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   peaks instead of the count.
+#' @param return.which For each pulse, return the index corresponding to the 
+#'   start of the pulse (\code{"first"}), end of the pulse (\code{"last"}), or
+#'   occurrence of the maximum value (\code{"max"}).
 #' @return The number of peaks above the threshold.
 #'
 #' @examples
 #' data(siouxcity)
 #' number_of_high_pulses(siouxcity['2009'], ut = 32000)
 #' number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE)
+#' number_of_high_pulses(siouxcity['2009'], ut = 32000, which = TRUE, 
+#'   return.which = "max")
 #'
 #' @export
-number_of_high_pulses = function(ts, ut, min.dur = NA, which = FALSE){
+number_of_high_pulses = function(ts, ut, min.dur = NA, ignore.first = FALSE,
+  which = FALSE, return.which = c("first", "last", "max")){
+  return.which = match.arg(tolower(return.which), c("first", "last", "max"))
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   pd = ts
@@ -297,13 +304,24 @@ number_of_high_pulses = function(ts, ut, min.dur = NA, which = FALSE){
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
+  if(ignore.first){
+    # drop first pulse if it includes first DOY
+    if(pulses[[1]][1] == index(ts)[1])
+      pulses[[1]] = NULL
+  }
   if(!is.na(min.dur))
     pulses = pulses[sapply(pulses, function(x) max(x) - min(x) >= min.dur)]
-  pulselocs = sapply(pulses, which.max)
-  if(which)
-    index(ts)[pulselocs]
-  else
-    length(pulselocs)
+  if(which){
+    if(return.which == "first"){
+      w = lapply(pulses, function(x) x[1])
+    } else if(return.which == "last"){
+      w = lapply(pulses, function(x) rev(x)[1])
+    } else {
+
+    }
+    setNames(do.call(c, w), NULL)
+  } else
+    length(pulses)
 }
 
 #' Number of Low Flow Pulses
@@ -313,8 +331,13 @@ number_of_high_pulses = function(ts, ut, min.dur = NA, which = FALSE){
 #' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold below which to identify pulses.
 #' @param min.dur The minimum duration required for a pulse to be counted.
+#' @param ignore.first Logical: Ignore the first pulse if it occurs at the
+#'   start of record.
 #' @param which Logical: If \code{TRUE}, return the index locations of the 
 #'   pulses instead of the count.
+#' @param return.which For each pulse, return the index corresponding to the 
+#'   start of the pulse (\code{"first"}), end of the pulse (\code{"last"}), or
+#'   occurrence of the minimum value (\code{"min"}).
 #' @return The number of pulses below the threshold.
 #'
 #' @examples
@@ -323,21 +346,34 @@ number_of_high_pulses = function(ts, ut, min.dur = NA, which = FALSE){
 #' number_of_low_pulses(siouxcity['2009'], lt = 12000, which = TRUE)
 #'
 #' @export
-number_of_low_pulses = function(ts, lt, min.dur = NA, which = FALSE){
+number_of_low_pulses = function(ts, lt, min.dur = NA, ignore.first = FALSE,
+  which = FALSE, return.which = c("first", "last", "min")){
+  return.which = match.arg(tolower(return.which), c("first", "last", "min"))
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   pd = ts
-  pd[ts >= lt] = NA
+  pd[ts > lt] = NA
   if(all(is.na(pd)))
     return(0)
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
+  if(ignore.first){
+    # drop first pulse if it includes first DOY
+    if(pulses[[1]][1] == index(ts)[1])
+      pulses[[1]] = NULL
+  }
   if(!is.na(min.dur))
-    pulses = pulses[sapply(pulses, function(x) max(x) - min(x) >= min.dur)]
+    pulses = pulses[sapply(pulses, function(x) (max(x) - min(x)) >= min.dur)]
   if(which){
-    pulselocs = sapply(pulses, which.min)
-    index(ts)[pulselocs]
+    if(return.which == "first"){
+      w = lapply(pulses, function(x) x[1])
+    } else if(return.which == "last"){
+      w = lapply(pulses, function(x) rev(x)[1])
+    } else {
+
+    }
+    setNames(do.call(c, w), NULL)
   } else
     length(pulses)
 }
@@ -348,6 +384,8 @@ number_of_low_pulses = function(ts, lt, min.dur = NA, which = FALSE){
 #'
 #' @param ts A time series of class \code{xts}.
 #' @param ut The upper flow threshold above which to identify pulses.
+#' @param ignore.first Logical: Ignore the first pulse if it occurs at the
+#'   start of record.
 #' @return The mean duration of high flow pulses.
 #'
 #' @examples
@@ -355,12 +393,12 @@ number_of_low_pulses = function(ts, lt, min.dur = NA, which = FALSE){
 #' mean_high_pulse_duration(siouxcity['2009'], ut = 32000)
 #'
 #' @export
-mean_high_pulse_duration = function(ts, ut){
+mean_high_pulse_duration = function(ts, ut, ignore.first = FALSE){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   interval = diff(index(ts))
   if(length(unique(interval)) > 1){
-    warning("time series is irregular. Results may be erroneous.")
+    warning("Time series is irregular. Results may be erroneous.")
   }
   interval = interval[[1]]
   pd = ts
@@ -370,6 +408,11 @@ mean_high_pulse_duration = function(ts, ut){
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
+  if(ignore.first){
+    # drop first pulse if it includes first DOY
+    if(pulses[[1]][1] == index(ts)[1])
+      pulses[[1]] = NULL
+  }
   pulselengths = sapply(pulses, function(x) interval + max(x) - min(x))
   mean(pulselengths)
 }
@@ -380,6 +423,8 @@ mean_high_pulse_duration = function(ts, ut){
 #'
 #' @param ts A time series of class \code{xts}.
 #' @param lt The lower flow threshold below which to identify pulses.
+#' @param ignore.first Logical: Ignore the first pulse if it occurs at the
+#'   start of record.
 #' @return The mean duration of high flow pulses.
 #'
 #' @examples
@@ -387,12 +432,12 @@ mean_high_pulse_duration = function(ts, ut){
 #' mean_low_pulse_duration(siouxcity['2009'], lt = 12000)
 #'
 #' @export
-mean_low_pulse_duration = function(ts, lt){
+mean_low_pulse_duration = function(ts, lt, ignore.first = FALSE){
   if(any(is.na(ts)))
     warning("NA values detected. Result may be erroneous.")
   interval = diff(index(ts))
   if(length(unique(interval)) > 1)
-    warning("time series is irregular. Results may be erroneous.")
+    warning("Time series is irregular. Results may be erroneous.")
   interval = interval[[1]]
   pd = ts
   pd[ts > lt] = NA
@@ -401,6 +446,11 @@ mean_low_pulse_duration = function(ts, lt){
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
+  if(ignore.first){
+    # drop first pulse if it includes first DOY
+    if(pulses[[1]][1] == index(ts)[1])
+      pulses[[1]] = NULL
+  }
   pulselengths = sapply(pulses, function(x) interval + max(x) - min(x))
   mean(pulselengths)
 }
@@ -426,6 +476,22 @@ number_of_no_flow_days = function(ts, tol = 0){
   length(unique(format(index(noflow), "%Y-%m-%d")))
 }
 
+#' Baseflow Index
+#'
+#' Compute the baseflow index.
+#'
+#' @param ts A time series of class \code{xts}. Assumes a regular timeseries.
+#' @return The baseflow index.
+#'
+#' @details The baseflow index is defined as the minimum 7-day average flow
+#'   normalized by the mean flow. The baseflow index is typically computed for
+#'   a single year of record.
+#'
+#' @export
+baseflow_index = function(ts){
+  average_minimum_flow(ts, 7, FALSE)/mean(coredata(ts))
+}
+
 #' Average Minimum Flow
 #'
 #' Compute the n-average minimum flow.
@@ -437,7 +503,7 @@ number_of_no_flow_days = function(ts, tol = 0){
 #' @param return The n-average minimum flow.
 #' 
 #' @examples
-#' @data(siouxcity)
+#' data(siouxcity)
 #' average_minimum_flow(siouxcity['2009'], 1)
 #' average_minimum_flow(siouxcity['2009'], 7)
 #' average_minimum_flow(siouxcity['2009'], 90, which = TRUE)
@@ -468,7 +534,7 @@ average_minimum_flow = function(ts, n = 1, which = FALSE){
 #' @param return The n-average maximum flow.
 #' 
 #' @examples
-#' @data(siouxcity)
+#' data(siouxcity)
 #' average_maximum_flow(siouxcity['2009'], 1)
 #' average_maximum_flow(siouxcity['2009'], 7)
 #' average_maximum_flow(siouxcity['2009'], 90, which = TRUE)
@@ -498,24 +564,32 @@ average_maximum_flow = function(ts, n = 1, which = FALSE){
 #' @param return The total number of flow reversals.
 #' 
 #' @examples
-#' @data(siouxcity)
+#' data(siouxcity)
 #' number_of_reversals(siouxcity['2009-01'])
 #' number_of_reversals(siouxcity['2009-01'], which = TRUE)
 #'
 #' @export
 number_of_reversals = function(ts, which = FALSE){
-  if(length(index(ts)) < 3){
-    warning("Argument 'ts' has less than 3 data points. Returning NA")
-    return(NA)
+  if(any(is.na(coredata(ts))))
+    warning("NA values detected. Result may be erroneous.")
+  # detect flow changes
+  dpd = c(sign(0), sign(diff(coredata(ts))))
+  # ignore first flow change and deal with leading zeros
+  dpd[1] = dpd[2]
+  f = which.min(!(dpd != 0))
+  dpd[1:f] = dpd[f]
+  # identify periods of no change and group with preceding behavior
+  zidx = NA
+  while(length(zidx) > 0){
+    zidx = which(!(dpd != 0))
+    dpd[zidx] = dpd[zidx - 1]
   }
-  revfun = function(x) 
-    ifelse(all(c(x[[1]], x[[3]]) < x[[2]]) | all(c(x[[1]], x[[3]]) > x[[2]]), 
-      TRUE, FALSE)
-  revflow = as.logical(coredata(rollapply(ts, 3, revfun, align = 'right', 
-    fill = FALSE)))
-  if(which)
-    index(ts)[revflow]
+  # identify reversals
+  revflow = rollapply(dpd, 2, function(x) x[2] != x[1], align = "right", 
+    fill = "FALSE")
+  if(which)  
+    index(ts[which(revflow)])
   else
-    sum(revflow)  
+    sum(revflow) 
 }
 

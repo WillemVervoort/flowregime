@@ -5,7 +5,7 @@
 \title{Indicators of Hydrologic Alteration}
 \usage{
 IHA(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, ut, lt,
-  keep.raw = TRUE)
+  parametric = TRUE, keep.raw = TRUE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -41,6 +41,14 @@ Compute the Indicators of Hydrologic Alteration for a daily time series.
 \details{
 The IHA method requires a regular time series with no missing 
   values.
+}
+\section{Notes on IHA}{
+
+  \itemize {
+    \item Low- and high-flow pulses occurring at the start of a year of 
+      record are ignored when calculating number of pulses and mean duration
+      of pulses.
+}
 }
 \examples{
 data(siouxcity)

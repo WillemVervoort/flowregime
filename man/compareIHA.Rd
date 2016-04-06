@@ -8,7 +8,7 @@ compareIHA(pre, post, as.percent = FALSE, cl = FALSE)
 }
 \arguments{
 \item{pre}{The pre-impact IHA statistics, i.e. the output of 
-\code{IHA(..., stat = TRUE)}.}
+\code{IHA(..., keep.raw = TRUE)}.}
 
 \item{post}{The post-impact IHA statistics.}
 
@@ -22,7 +22,7 @@ parameter.}
 \value{
 A dataframe containing either the magnitude of difference or 
   relative percent difference of each parameter, and (optionally) the upper
-  and lowe confidence intervals.
+  and lower confidence intervals.
 }
 \description{
 Compare the results of two IHA analyses, e.g. pre- and post-impact periods.

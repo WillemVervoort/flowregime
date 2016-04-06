@@ -23,6 +23,14 @@
 #'
 #' @details The IHA method requires a regular time series with no missing 
 #'   values. 
+#'
+#' @section Notes on IHA:
+#'   \itemize {
+#'     \item Low- and high-flow pulses occurring at the start of a year of 
+#'       record are ignored when calculating number of pulses and mean duration
+#'       of pulses.
+#' } 
+#'
 #' @references Richter, B. D., Baumgartner, J. V., Powell, J. and Braun, D. P.
 #'   (1996), A Method for Assessing Hydrologic Alteration within Ecosystems.
 #'   Conservation Biology, 10: 1163-1174. doi: 10.1046/j.1523-1739.1996.10041163.x
@@ -36,7 +44,7 @@
 #'
 #' @export
 IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
-  ut, lt, keep.raw = TRUE){
+  ut, lt, parametric = TRUE, keep.raw = TRUE){
   # argument checking
   if(yearstart == yearend)
     stop("Arguments 'yearstart' and 'yearend' must be different")
@@ -54,20 +62,32 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
   if(length(startidx) != length(endidx))
     stop("Flow record is incomplete")
   sets = paste(startidx, endidx, sep = "/")
-  # define groups to compute
-  groupfuns = list(group1, group2, group3, function(x) group4(x, ut, lt), 
-    group5)[groups]
-  # calculate groups for each year in record
-  records = setNames(vector('list', length(sets)), sets)
-  for(n in names(records)){
-    r = pd[n]
-    res = lapply(groupfuns, function(fun) fun(r))
-    records[[n]] = do.call(rbind.data.frame, res)
-    records[[n]]["YoR"] = n
+  # helper function for computing groups
+  looper = function(record, periods, fun, ...){
+    res = setNames(vector("list", length(periods)), periods)
+    for(p in periods){
+      r = record[p]
+      res[[p]] = fun(r, ...)
+      res[[p]]["YoR"] = p
+    }
+    ret = do.call(rbind.data.frame, res)
+    rownames(ret) = NULL
+    ret
   }
-  res = do.call(rbind.data.frame, records)
-  rownames(res) = NULL
-  # compute stats for each group
+  # compute groups
+  gd = vector("list", 5)
+  if(1 %in% groups)
+    gd[[1]] = looper(pd, sets, group1, parametric)
+  if(2 %in% groups)
+    gd[[2]] = looper(pd, sets, group2)
+  if(3 %in% groups)
+    gd[[3]] = looper(pd, sets, group3)
+  if(4 %in% groups)
+    gd[[4]] = group4(pd, ut, lt, sets, parametric)
+  if(5 %in% groups)
+    gd[[5]] = looper(pd, sets, group5, parametric)  
+  res = do.call(rbind.data.frame, gd)  
+# compute stats for each group
   pnames = unique(res$parameter)
   pcentral = setNames(vector("numeric", length(pnames)), pnames)
   pdispersion = pcentral
@@ -88,11 +108,18 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
     res2
 }
 
-group1 = function(r){
+group1 = function(r, para){
+  if(para){
+    fun = mean
+    tag = "mean"
+  } else {
+    fun = median
+    tag = "median"
+  }
   mnths = unique(format(index(r), "%b"))
   res = sapply(mnths, function(x) 
-    mean(coredata(r)[which(format(index(r), "%b") == x)]))
-  data.frame(parameter = paste0("mean (", mnths, ")"), value = res, 
+    fun(coredata(r)[which(format(index(r), "%b") == x)]))
+  data.frame(parameter = paste0(tag, " (", mnths, ")"), value = res, 
     row.names = NULL)
 }
 
@@ -108,42 +135,78 @@ group2 = function(r){
     maxima[[i]] = max(coredata(rollr))
   }
   res = c(minima, maxima)
+  res[["no. zero-flow days"]] = number_of_no_flow_days(r, 0)
+  res[["baseflow index"]] = baseflow_index(r)
+
   data.frame(parameter = names(res), value = res, row.names = NULL)
 }
 
 group3 = function(r){
-  max1 = format(index(r)[which.max(coredata(r))], "%m-%d")
-  min1 = format(index(r)[which.min(coredata(r))], "%m-%d")
-  jds = setNames(seq(1:366), format(seq(as.Date("2004-01-01"), 
-    as.Date("2004-12-31"), by = "1 day"), "%m-%d"))
-  max1 = jds[[which(max1 == names(jds))]]
-  min1 = jds[[which(min1 == names(jds))]]
+  max1 = get_jd(as.POSIXlt(index(r)[which.max(coredata(r))]))
+  min1 = get_jd(as.POSIXlt(index(r)[which.min(coredata(r))]))  
   data.frame(parameter = c("minima JD", "maxima JD"), value = c(min1, max1))
 }
 
-group4 = function(r, ut, lt){
-  hp = number_of_high_pulses(r, ut, which = FALSE)
-  lp = number_of_low_pulses(r, lt, which = FALSE)
-  hpd = mean_high_pulse_duration(r, ut)
-  lpd = mean_low_pulse_duration(r, lt)
-  res = c("no. low pulses" = lp, "mean low pulse duration" = lpd, 
-    "no. high pulses" = hp, "mean high pulse duration" = hpd)
-  data.frame(parameter = names(res), value = res, row.names = NULL)
-  
+group4 = function(rec, ut, lt, periods, para){
+    if(para){
+    fun = mean
+    tag = "mean"
+  } else {
+    fun = median
+    tag = "median"
+  }
+  interval = diff(index(rec))
+  if(length(unique(interval)) > 1){
+    warning("Time series is irregular. Results may be erroneous.")
+  }
+  interval = interval[[1]]
+  # get pulses and durations
+  hpf = number_of_high_pulses(rec, ut, which = TRUE, return.which = "first", 
+    ignore.first = TRUE)
+  hpl = number_of_high_pulses(rec, ut, which = TRUE, return.which = "last", 
+    ignore.first = TRUE)
+  hpdur = interval + hpl - hpf
+  lpf = number_of_low_pulses(rec, lt, which = TRUE, return.which = "first", 
+    ignore.first = TRUE, min.dur = as.difftime(1, units = "days"))
+  lpl = number_of_low_pulses(rec, lt, which = TRUE, return.which = "last", 
+    ignore.first = TRUE, min.dur = as.difftime(1, units = "days"))
+  lpdur = interval + lpl - lpf
+  # split by period
+  hpidx = lapply(periods, function(x) hpf[which(hpf %in% index(rec[x]))])  
+  hduridx = lapply(periods, function(x) hpdur[which(hpf %in% index(rec[x]))])
+  lpidx = lapply(periods, function(x) lpf[which(lpf %in% index(rec[x]))])  
+  lduridx = lapply(periods, function(x) lpdur[which(lpf %in% index(rec[x]))])
+  res = vector("list", length(periods))
+  nm = 
+  for(i in seq_along(res)){
+    resv = setNames(c(length(lpidx[[i]]), fun(lduridx[[i]]), 
+      length(hpidx[[i]]), fun(hduridx[[i]])), c("no. low pulses", 
+      paste(tag, "low pulse duration"), "no. high pulses", 
+      paste(tag, "high pulse duration")))    
+    res[[i]] = data.frame(parameter = names(resv), value = resv, 
+      YoR = periods[[i]], row.names = NULL)
+  }
+  do.call(rbind.data.frame, res)
 }
 
-group5 = function(r){
-  diffs = tail(diff(r), -1)
+group5 = function(r, para){
+  if(para){
+    fun = mean
+    tag = "mean"
+  } else {
+    fun = median
+    tag = "median"
+  }
+  diffv = tail(diff(coredata(r)), -1)
+  difft = tail(diff(index(r)), -1)
+  diffs = diffv/as.numeric(difft)
   whichpos = which(diffs > 0)
   whichneg = which(diffs < 0)
-  meanpos = mean(diffs[whichpos])
-  meanneg = mean(diffs[whichneg])
-  reversalfun = function(x)
-    ifelse(((x[2] > x[1]) && (x[3] < x[2])) || (x[2] < x[1]) && (x[3] > x[2]), 
-      TRUE, FALSE)
-  reversals = sum(rollapply(r, 3, reversalfun, align = "right", fill = NULL))
-  res = c("mean rise rate" = meanpos, "mean fall rate" = meanneg, 
-    "no. reversals" = reversals)
+  meanpos = fun(diffs[whichpos])
+  meanneg = fun(diffs[whichneg])
+  reversals = number_of_reversals(r, which = FALSE)
+  res = setNames(c(meanpos, meanneg, reversals), c(paste(tag, "rise rate"), 
+  paste(tag, "fall rate"), "no. reversals"))
   data.frame(parameter = names(res), value = res, row.names = NULL)
 }
 
@@ -152,7 +215,7 @@ group5 = function(r){
 #' Compare the results of two IHA analyses, e.g. pre- and post-impact periods.
 #'
 #' @param pre The pre-impact IHA statistics, i.e. the output of 
-#'   \code{IHA(..., stat = TRUE)}.
+#'   \code{IHA(..., keep.raw = TRUE)}.
 #' @param post The post-impact IHA statistics.
 #' @param as.percent If \code{TRUE}, return the differences as a relative 
 #'   percent difference (\code{(post - pre)/pre}). Otherwise, return the 
@@ -161,7 +224,7 @@ group5 = function(r){
 #'   parameter.
 #' @return A dataframe containing either the magnitude of difference or 
 #'   relative percent difference of each parameter, and (optionally) the upper
-#'   and lowe confidence intervals.
+#'   and lower confidence intervals.
 #'
 #' @examples
 #' data(siouxcity)
@@ -172,7 +235,7 @@ group5 = function(r){
 #'
 #' @export
 compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
-  if(!identical(sort(pre$parameters), sort(post$parameters)))
+  if(!identical(sort(pre$parameter), sort(post$parameter)))
     stop("'pre' and 'post' analyses do not match.")
   post = post[match(pre$parameter, post$parameter),]
   ctendiff = post$central.tendency - pre$central.tendency
@@ -197,13 +260,15 @@ compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
 # circular statistics for IHA
 circ_stat = function(v, statfun){
   q1bin = v < 92
-  q2bin = (v > 91) && (v < 184)
-  q3bin = (v > 183) && (v < 276)
+  q2bin = (v > 91) & (v < 184)
+  q3bin = (v > 183) & (v < 276)
   q4bin = v > 275
-  whichbin = which.max(c(q1bin, q2bin, q3bin, q4bin))
-  if(whichbin == 1 & ((sum(q3bin) >= 0.1*length(v)) || (sum(q4bin) >= 0.1*length(v)))){
-    warning("spread")
-  }
+  # identify largest bin
+  q1size = sum(q1bin)
+  q2size = sum(q2bin)
+  q3size = sum(q3bin)
+  q4size = sum(q4bin)
+  whichbin = which.max(c(q1size, q2size, q3size, q4size))
   if(whichbin %in% c(2, 3)){
     res = statfun(v)
   } else if(whichbin == 1){
@@ -215,5 +280,35 @@ circ_stat = function(v, statfun){
     res = statfun(v)
     res = ifelse(res > 366, res - 366, res)
   }
+  # warn about data scatter
+  n = length(v)
+  if(((whichbin == 1) && (q3size > 0.1*n)) ||
+     ((whichbin == 2) && (q4size > 0.1*n)) ||
+     ((whichbin == 3) && (q1size > 0.1*n)) ||
+     ((whichbin == 4) && (q2size > 0.1*n)))
+    warning("Dates of extreme flows are widely distributed throughout the ",
+      "year. Use statistics with caution.")     
   res
 }
+
+#' IHA Julian Day
+#'
+#' Compute Julian Day as per IHA v7.
+#'
+#' @param d Date or POSIX*t object
+#' @return Integer Julian date. 
+#'
+#' @details IHA defines Jan 1 as JD 1 and Dec 31 as JD 366 for both leap years
+#'   and non-leap years. In non-leap years, JD 60 (Feb 29) is skipped, so that
+#'   e.g. Feb 28 2003 is JD 59 and Mar 01 2003 is JD 61.
+#'
+get_jd = function(d){
+  year = d$year + 1900
+  month = d$mon + 1
+  jd = d$yday + 1
+  if(!((year %% 4 == 0) && ((year %% 100 != 0) || (year %% 400 == 0))) &&
+    month > 2)
+    jd + 1
+  else
+    jd
+}  

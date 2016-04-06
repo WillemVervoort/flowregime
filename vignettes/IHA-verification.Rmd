@@ -1,0 +1,48 @@
+# Verification of the IHA algorithm
+
+This vignette verifies the `flowregime` package implementation of Indicators of
+Hydrologic Alteration (IHA). The analysis of the Roanoke Rapids flow record 
+described in Richter et al (1996) is repeated using both IHA v7 and the 
+`IHA` function provided by `flowregime`.
+
+```{r load data}
+setwd("C:/repository")
+devtools::load_all("flowregime")
+data(roanokerapids)
+pre.period = roanokerapids['1912-10-01/1949-09-30']
+post.period = roanokerapids['1955-10-01/1991-09-30']
+hpthresh = mean(pre.period) + sd(pre.period)
+lpthresh = quantile(pre.period, 0.25)[[1]]
+pre.results = IHA(pre.period, ut = hpthresh, lt = lpthresh, 
+  yearstart = "10-01", yearend = "09-30", parametric = TRUE)
+post.results = IHA(post.period, ut = hpthresh, lt = lpthresh, 
+  yearstart = "10-01", yearend = "09-30", parametric = TRUE)
+comp.results = compareIHA(pre.results, post.results, as.percent = FALSE, 
+  cl = FALSE)
+```
+
+
+
+
+
+# References
+
+The Nature Conservancy, 2009. Indicators of Hydrologic Alteration Version 7.1
+User's Manual.
+
+Poff, N. L. and J. V. Ward. 1989. Implications of Streamflow Variability and
+Predictibility for Iotic Community Structure: a Regional Analysis of Streamflow 
+Patterns. Canadian Journal of Aquatic Sciences 46: 1805-1818.
+
+Richter, B. D., Baumgartner, J. V., Powell, J. and Braun, D. P. (1996), A 
+Method for Assessing Hydrologic Alteration within Ecosystems. Conservation 
+Biology, 10: 1163-1174. doi: 10.1046/j.1523-1739.1996.10041163.x
+
+Richter, B.D, J.V. Baumgartner, R. Wigington, and D.P. Braun. 1997. How much 
+water does a river need? Freshwater Biology 37, 231-249.
+
+
+
+no low pulses
+low pulse dur
+num reversals

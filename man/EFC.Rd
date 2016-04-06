@@ -19,7 +19,7 @@ the end of the water year, in the format "mm-dd". Default is "12-31".}
 \item{method}{The method used to compute environmental flow components:
 may be either 'standard' or 'advanced'.}
 
-\item{A}{list containing all or some of the following elements:}
+\item{thresholds}{A list containing all or some of the following elements:}
 }
 \value{
 An \code{xts} time series of EFC factors.

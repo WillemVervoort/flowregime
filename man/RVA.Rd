@@ -12,6 +12,9 @@ RVA(pre, post, boundaries, parametric = TRUE)
 
 \item{post}{The post-impact IHA statistics.}
 
+\item{boundaries}{a two-element numeric vector of cutoffs that define the
+three RVA categories.}
+
 \item{parametric}{Logical: perform parametric (mean) or non-parametric
 (median) analysis.}
 }
@@ -20,5 +23,13 @@ A dataframe.
 }
 \description{
 Compute the IHA Range of Variability.
+}
+\details{
+The \code{boundaries} argument defines cutoffs relative to the mean
+  (if \code{parametric = TRUE}) or median (if \code{parametric = FALSE}), 
+  e.g. \code{boundaries = c(-17, 17)} represents cutoffs at the 33rd and 
+  67th percentile when \code{parametric = FALSE}, and 
+  \code{boundaries = c(-0.5, 0.5)} represents cutoffs at +/- 0.5 standard
+  deviations from the mean when \code{parametric = TRUE}.
 }
 

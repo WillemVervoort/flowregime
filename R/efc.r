@@ -24,7 +24,7 @@ EFC_default_thresholds = function(ts, method = c("standard", "advanced")){
 #'   the end of the water year, in the format "mm-dd". Default is "12-31".
 #' @param method The method used to compute environmental flow components:
 #'   may be either 'standard' or 'advanced'.
-#' @param A list containing all or some of the following elements:
+#' @param thresholds A list containing all or some of the following elements:
 #' @return An \code{xts} time series of EFC factors.
 #'
 #'

@@ -498,7 +498,7 @@ baseflow_index = function(ts){
 #' @param n The moving-window size.
 #' @param which Logical: If \code{TRUE}, return the index location of the 
 #'   n-average minimum flow instead of the flow magnitude.
-#' @param return The n-average minimum flow.
+#' @return The n-average minimum flow.
 #' 
 #' @examples
 #' data(siouxcity)
@@ -529,7 +529,7 @@ average_minimum_flow = function(ts, n = 1, which = FALSE){
 #' @param n The moving-window size.
 #' @param which Logical: If \code{TRUE}, return the index location of the 
 #'   n-average maximum flow instead of the flow magnitude.
-#' @param return The n-average maximum flow.
+#' @return The n-average maximum flow.
 #' 
 #' @examples
 #' data(siouxcity)
@@ -559,7 +559,7 @@ average_maximum_flow = function(ts, n = 1, which = FALSE){
 #' @param ts A time series of class \code{xts}. Assumes a regular timeseries.
 #' @param which Logical: If \code{TRUE}, return the index location of the 
 #'   flow reversals instead of the total number of reversals.
-#' @param return The total number of flow reversals.
+#' @return The total number of flow reversals.
 #' 
 #' @examples
 #' data(siouxcity)

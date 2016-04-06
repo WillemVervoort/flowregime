@@ -25,6 +25,9 @@ recommends the 75th flow percentile for pre-impact conditions.}
 \item{lt}{The lower flow threshold for identifying low flow pulses. IHA 
 recommends the 25th flow percentile for pre-impact conditions.}
 
+\item{parametric}{Logical: perform parametric (mean) or non-parametric
+(median) analysis.}
+
 \item{keep.raw}{Logical: return the hydrologic attributes for each year 
 of record as attribute 'raw' of the output dataframe.}
 }
@@ -42,12 +45,17 @@ Compute the Indicators of Hydrologic Alteration for a daily time series.
 The IHA method requires a regular time series with no missing 
   values.
 }
-\section{Notes on IHA}{
+\section{Notes}{
 
-  \itemize {
+  \itemize{
     \item Low- and high-flow pulses occurring at the start of a year of 
       record are ignored when calculating number of pulses and mean duration
       of pulses.
+    \item IHA v7 rounds averages of flow values to the nearest whole number for
+      individual water years, and this rounding propagates through the 
+      scorecard. Numerical results may differ slightly from IHAv7.
+      
+
 }
 }
 \examples{

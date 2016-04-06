@@ -13,6 +13,8 @@
 #'   recommends the 75th flow percentile for pre-impact conditions.
 #' @param lt The lower flow threshold for identifying low flow pulses. IHA 
 #'   recommends the 25th flow percentile for pre-impact conditions.
+#' @param parametric Logical: perform parametric (mean) or non-parametric
+#'   (median) analysis.
 #' @param keep.raw Logical: return the hydrologic attributes for each year 
 #'   of record as attribute 'raw' of the output dataframe. 
 #' @return A 3-column dataframe. If \code{stat = TRUE}, the dataframe contains 
@@ -24,11 +26,16 @@
 #' @details The IHA method requires a regular time series with no missing 
 #'   values. 
 #'
-#' @section Notes on IHA:
-#'   \itemize {
+#' @section Notes:
+#'   \itemize{
 #'     \item Low- and high-flow pulses occurring at the start of a year of 
 #'       record are ignored when calculating number of pulses and mean duration
 #'       of pulses.
+#'     \item IHA v7 rounds averages of flow values to the nearest whole number for
+#'       individual water years, and this rounding propagates through the 
+#'       scorecard. Numerical results may differ slightly from IHAv7.
+#'       
+#'
 #' } 
 #'
 #' @references Richter, B. D., Baumgartner, J. V., Powell, J. and Braun, D. P.

@@ -13,8 +13,9 @@ average_minimum_flow(ts, n = 1, which = FALSE)
 
 \item{which}{Logical: If \code{TRUE}, return the index location of the 
 n-average minimum flow instead of the flow magnitude.}
-
-\item{return}{The n-average minimum flow.}
+}
+\value{
+The n-average minimum flow.
 }
 \description{
 Compute the n-average minimum flow.

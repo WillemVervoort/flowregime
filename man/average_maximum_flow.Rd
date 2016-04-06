@@ -13,8 +13,9 @@ average_maximum_flow(ts, n = 1, which = FALSE)
 
 \item{which}{Logical: If \code{TRUE}, return the index location of the 
 n-average maximum flow instead of the flow magnitude.}
-
-\item{return}{The n-average maximum flow.}
+}
+\value{
+The n-average maximum flow.
 }
 \description{
 Compute the n-average maximum flow.

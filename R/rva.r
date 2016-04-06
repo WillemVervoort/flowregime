@@ -2,6 +2,12 @@
 #' 
 #' Compute the IHA Range of Variability.
 #'
+#' @param pre The pre-impact IHA statistics, i.e. the output of 
+#'   \code{IHA(..., keep.raw = TRUE)}.
+#' @param post The post-impact IHA statistics.
+#' @param parametric Logical: perform parametric (mean) or non-parametric
+#'   (median) analysis.
+#' @return A dataframe.
 #'
 RVA = function(pre, post, boundaries, parametric = TRUE){
   boundaries = sort(unique(boundaries))

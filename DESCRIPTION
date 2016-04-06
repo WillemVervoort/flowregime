@@ -13,6 +13,8 @@ BugReports: https://github.com/mkoohafkan/flowregime/issues
 License: GPL (>= 3)
 Depends:
     R (>= 3.2.0),
+    stats,
+    utils,
     xts (>= 0.9-7)
 Imports:
     zoo (>= 1.7-12)

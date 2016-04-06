@@ -6,6 +6,18 @@
 \usage{
 RVA(pre, post, boundaries, parametric = TRUE)
 }
+\arguments{
+\item{pre}{The pre-impact IHA statistics, i.e. the output of 
+\code{IHA(..., keep.raw = TRUE)}.}
+
+\item{post}{The post-impact IHA statistics.}
+
+\item{parametric}{Logical: perform parametric (mean) or non-parametric
+(median) analysis.}
+}
+\value{
+A dataframe.
+}
 \description{
 Compute the IHA Range of Variability.
 }

@@ -11,8 +11,9 @@ number_of_reversals(ts, which = FALSE)
 
 \item{which}{Logical: If \code{TRUE}, return the index location of the 
 flow reversals instead of the total number of reversals.}
-
-\item{return}{The total number of flow reversals.}
+}
+\value{
+The total number of flow reversals.
 }
 \description{
 Compute the number of times that the flow rate of change reverses.

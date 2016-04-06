@@ -4,9 +4,21 @@
 \alias{EFC_default_thresholds}
 \title{Default thresholds for EFC Analysis}
 \usage{
-EFC_default_thresholds(ts)
+EFC_default_thresholds(ts, method = c("standard", "advanced"))
+}
+\arguments{
+\item{ts}{A time series of class \code{xts}.}
+
+\item{method}{The method used to compute environmental flow components:
+may be either 'standard' or 'advanced'.}
+}
+\value{
+a list containing the following thresholds:
 }
 \description{
 Default thresholds for EFC Analysis
+}
+\seealso{
+\link{EFC}
 }
 

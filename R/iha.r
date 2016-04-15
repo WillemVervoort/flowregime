@@ -47,8 +47,6 @@
 #' IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
 #'   yearend = "09-30", ut = 32000, lt = 12000, parametric = FALSE)
 #'
-#' @import stats
-#' @import utils
 #' @export
 IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
   ut, lt, parametric = TRUE){
@@ -185,6 +183,8 @@ group4 = function(rec, ut, lt, periods, para){
   do.call(rbind.data.frame, res)
 }
 
+#' @importFrom stats setNames
+#' @importFrom utils tail
 group5 = function(r, para){
   if(para){
     fun = mean
@@ -207,6 +207,8 @@ group5 = function(r, para){
     stringsAsFactors = FALSE)
 }
 
+#' @importFrom stats IQR
+#' @importFrom stats setNames
 #' @export
 summary.IHA = function(object, ...){
   parametric = attr(object, "parametric")
@@ -237,14 +239,59 @@ summary.IHA = function(object, ...){
       dispersion = pdispersion, row.names = NULL, stringsAsFactors = FALSE)
 }
 
+#' Confidence Intervals for IHA Central Tendencies
+#'
+#' Computes confidence intervals for parametric and non-parametric central 
+#' tendencies computed by IHA.
+#'
+#' @param object An object of class \code{IHA}.
+#' @param parm A specification of which parameters are to be given confidence
+#'   intervals, either a vector of numbers or a vector of names. If missing, 
+#'   all parameters are considered.
+#' @param level The confidence level required.
+#' @param ... additional argument(s) for methods.
+#' @return A matrix (or vector) with columns giving lower and upper confidence 
+#'   limits for each parameter. These will be labelled as (1 - level)/2 and 
+#'   1 - (1 - level)/2 in % (by default 2.5% and 97.5%). 
+#' 
+#' @details Parametric confidence intervals are computed using \code{t-test}.
+#'   Non-parametric confidence intervals are based on parameter value rankings.
+#'
+#' @examples
+#' data(siouxcity)
+#' res = IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000)
+#' summary(res)
+#' confint(res)
+#'
+#'@importFrom stats setNames
+#'@importFrom stats qnorm
+#'@importFrom stats t.test
+
 #' @export
 confint.IHA = function(object, parm, level = 0.95, ...){
-  stop("This has not been implemented")
   parametric = attr(object, "parametric")
   if(missing(parm))
     parm = unique(object$parameter)
   res = object[object$parameter %in% parm,]
-  res.summary = summary.IHA(res)
+  if(parametric)
+    cint = function(x){
+      vals = object[object$parameter == x, "value"]
+      cf = t.test(vals, conf.level = level)$conf.int[1:2]
+      setNames(data.frame(x, cf[[1]], cf[[2]]), c("parameter", 
+        paste(100*c(0.5*(1 - level), 1 - 0.5*(1 - level)), "%")))
+    }  
+  else
+    cint = function(x){
+      vals = object[object$parameter == x, "value"]
+      n = length(vals)
+      qn = qnorm(0.5*(1 + level))
+      r = 0.5*(n - qn*sqrt(n))
+      s = 1 + 0.5*(n + qn*sqrt(n))
+      cf = sort(vals)[round(c(r, s))]
+      setNames(data.frame(x, cf[[1]], cf[[2]]), c("parameter", 
+        paste(100*c(0.5*(1 - level), 1 - 0.5*(1 - level)), "%")))
+    }
+  do.call(rbind.data.frame, lapply(parm, cint))
 }
 
 #' Compare IHA Results
@@ -262,6 +309,7 @@ confint.IHA = function(object, parm, level = 0.95, ...){
 #' post = IHA(siouxcity['2010/2014'], ut = 32000, lt = 12000)
 #' compareIHA(pre, post)
 #'
+#'@importFrom stats setNames
 #' @export
 compareIHA = function(pre, post){
   if(!all("IHA" %in% class(pre)) && ("IHA" %in% class(post)))

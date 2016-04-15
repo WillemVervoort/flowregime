@@ -17,6 +17,7 @@
 #'   \code{boundaries = c(-0.5, 0.5)} represents cutoffs at +/- 0.5 standard
 #'   deviations from the mean when \code{parametric = TRUE}.
 #'
+#' @importFrom stats setNames
 #' @export
 RVA = function(pre, post, rvacat){
   if(!identical(sort(pre$parameters), sort(post$parameters)))
@@ -30,7 +31,7 @@ RVA = function(pre, post, rvacat){
   # get pre and post counts for each RVA category
   pre.freq = rva_freq(pre.raw, rvacat)
   post.freq = rva_freq(post.raw, rvacat)
-  # calculatate HA Factor
+  # calculate HA Factor
   ratio = length(unique(post.raw$YoR))/length(unique(pre.raw$YoR))
   get_HAF = function(o, e) 
     (o/ratio - e)/e
@@ -81,6 +82,8 @@ rva_freq = function(iha.raw, cats){
 #' @return A 4-column dataframe containing the upper and lower bounds of the 
 #'   RVA categories for each parameter.
 #'
+#' @importFrom stats quantile
+#' @importFrom stats setNames
 #' @export
 build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE), 
   na.rm = FALSE){
@@ -100,7 +103,7 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
   bnd = boundaries[order(boundaries)]
   para = parametric[order(boundaries)]
   pfun = function(v, i) 
-    mean(v, na.rm = FALSE) + i*sd(v)
+    mean(v, na.rm = na.rm) + i*sd(v)
   npfun = function(v, i) 
     quantile(v, 0.01*(50 + i), na.rm = na.rm)[[1]]
   lfun = if(para[[1]]) pfun else npfun

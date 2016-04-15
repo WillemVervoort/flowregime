@@ -146,6 +146,8 @@ time_to_recede = function(ts, lt, ut, which = FALSE){
 #' longest_high_flow_duration(siouxcity['2011'], 70000)
 #' longest_high_flow_duration(siouxcity['2011'], 70000, which = TRUE)
 #'
+#' @importFrom utils head
+#' @importFrom utils tail
 #' @export
 longest_high_flow_duration = function(ts, ut, which = FALSE){
   if(any(is.na(ts)))
@@ -183,6 +185,8 @@ longest_high_flow_duration = function(ts, ut, which = FALSE){
 #' longest_low_flow_duration(siouxcity['2006-06/2007-06'], 18000)
 #' longest_low_flow_duration(siouxcity['2006-06/2007-06'], 18000, which = TRUE)
 #'
+#' @importFrom utils head
+#' @importFrom utils tail
 #' @export
 longest_low_flow_duration = function(ts, lt, which = FALSE){
   if(any(is.na(ts)))

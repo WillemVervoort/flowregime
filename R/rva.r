@@ -90,7 +90,7 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
   if(!all(is.logical(parametric)))
     stop("Value of argument 'parametric' not recognized.")
   if(length(parametric) < 2)
-    parametric = c(parametric, parametric)
+    parametric = rep(parametric, 2)
   if(missing(boundaries)){
     boundaries = c(
       if(parametric[[1]]) -1 else -17,
@@ -99,7 +99,6 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
     warning("Argument 'boundaries' not specified. Using default values ", 
       paste(boundaries, collapse = " and "), ".")
   }
-  iha.raw = attr(pre, "raw")
   bnd = boundaries[order(boundaries)]
   para = parametric[order(boundaries)]
   pfun = function(v, i) 
@@ -108,13 +107,12 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
     quantile(v, 0.01*(50 + i), na.rm = na.rm)[[1]]
   lfun = if(para[[1]]) pfun else npfun
   ufun = if(para[[2]]) pfun else npfun  
-  params = unique(iha.raw$parameter)
+  params = unique(pre$parameter)
   parambounds = setNames(vector("list", length(params)), params)
   for(i in params){
-    d = iha.raw[iha.raw$parameter == i,]
-    parambounds[[i]] = data.frame(parameter = i, 
-      lower = lfun(d$value, bnd[[1]]), upper = ufun(d$value, bnd[[2]]), 
-      row.names = NULL, stringsAsFactors = FALSE)
+    vals = pre[pre$parameter == i, "value"]
+    parambounds[[i]] = data.frame(parameter = i, lower = lfun(d, bnd[[1]]), 
+      upper = ufun(d, bnd[[2]]), row.names = NULL, stringsAsFactors = FALSE)
   }
   do.call(rbind.data.frame, parambounds)
 }

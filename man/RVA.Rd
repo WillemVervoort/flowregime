@@ -4,7 +4,7 @@
 \alias{RVA}
 \title{IHA Range of Variability Approach}
 \usage{
-RVA(pre, post, boundaries, parametric = TRUE)
+RVA(pre, post, rvacat)
 }
 \arguments{
 \item{pre}{The pre-impact IHA statistics, i.e. the output of 
@@ -12,17 +12,15 @@ RVA(pre, post, boundaries, parametric = TRUE)
 
 \item{post}{The post-impact IHA statistics.}
 
-\item{boundaries}{a two-element numeric vector of cutoffs that define the
-three RVA categories.}
-
-\item{parametric}{Logical: perform parametric (mean) or non-parametric
-(median) analysis.}
+\item{rvacat}{The RVA categories, as defined by e.g. RVA_categories(pre)}
 }
 \value{
-A dataframe.
+A 5-column dataframe containing the Hydrologic Alteration Factor for 
+  each parameter and RVA category, and the upper and lower bounds defining 
+  the RVA categories for each parameter.
 }
 \description{
-Compute the IHA Range of Variability.
+Analyse IHA results using the Range of Variability Approach.
 }
 \details{
 The \code{boundaries} argument defines cutoffs relative to the mean

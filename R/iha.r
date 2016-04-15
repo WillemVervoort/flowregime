@@ -49,6 +49,8 @@
 #' IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
 #'   yearend = "09-30", ut = 32000, lt = 12000, parametric = FALSE)
 #'
+#' @import stats
+#' @import utils
 #' @export
 IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
   ut, lt, parametric = TRUE){

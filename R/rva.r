@@ -3,7 +3,7 @@
 #' Analyse IHA results using the Range of Variability Approach.
 #'
 #' @param pre The pre-impact IHA statistics, i.e. the output of 
-#'   \code{IHA(..., keep.raw = TRUE)}.
+#'   \code{IHA(...)}.
 #' @param post The post-impact IHA statistics.
 #'@param rvacat The RVA categories, as defined by e.g. RVA_categories(pre)
 #' @return A 5-column dataframe containing the Hydrologic Alteration Factor for 
@@ -22,17 +22,13 @@
 RVA = function(pre, post, rvacat){
   if(!identical(sort(pre$parameters), sort(post$parameters)))
     stop("'pre' and 'post' analyses do not match.")
-  pre.raw = attr(pre, "raw")
-  post.raw = attr(post, "raw")
-  if(is.null(pre.raw) || is.null(post.raw))
-    stop("Cannot compute RVA for outputs of IHA(..., keep.raw = FALSE).")
   check_RVA_categories(rvacat, pre)
   # define RVA boundaries
   # get pre and post counts for each RVA category
-  pre.freq = rva_freq(pre.raw, rvacat)
-  post.freq = rva_freq(post.raw, rvacat)
+  pre.freq = rva_freq(pre, rvacat)
+  post.freq = rva_freq(post, rvacat)
   # calculate HA Factor
-  ratio = length(unique(post.raw$YoR))/length(unique(pre.raw$YoR))
+  ratio = length(unique(post$YoR))/length(unique(pre$YoR))
   get_HAF = function(o, e) 
     (o/ratio - e)/e
   params = names(pre.freq)
@@ -52,11 +48,11 @@ RVA = function(pre, post, rvacat){
 }
 
 # get category counts
-rva_freq = function(iha.raw, cats){
-  params = unique(iha.raw$parameter)
+rva_freq = function(iha, cats){
+  params = unique(iha$parameter)
   res = setNames(vector("list", length(params)), params)
   for(i in params){
-    vals = iha.raw[iha.raw$parameter == i, 'value']
+    vals = iha[iha$parameter == i, 'value']
     low = vals < cats[cats$parameter == i, 'lower']
     high = vals > cats[cats$parameter == i, 'upper']
     mid = !(low | high)
@@ -71,7 +67,7 @@ rva_freq = function(iha.raw, cats){
 #' RVA approach.
 #'
 #' @param pre The pre-impact IHA statistics, i.e. the output of 
-#'   \code{IHA(..., keep.raw = TRUE)}.
+#'   \code{IHA(...)}.
 #' @param boundaries a two-element numeric vector of cutoffs that define the
 #'   three RVA categories.
 #' @param parametric A logical vector with 1 or 2 elements: Compute lower and
@@ -125,19 +121,18 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
 #'
 #' @param rvacat The RVA categories, as defined by e.g. RVA_categories(pre).
 #' @param pre The pre-impact IHA statistics used to define the RVA categories, 
-#'   i.e. the output of \code{IHA(..., keep.raw = TRUE)}.
+#'   i.e. the output of \code{IHA(...)}.
 #' @return A dataframe of 3 columns:
 #'
 #' @export
 check_RVA_categories = function(rvacat, pre){
-  iha.raw = attr(pre, "raw")
-  params = unique(iha.raw$parameter)
+  params = unique(pre$parameter)
   if(!all(sort(params) == sort(rvacat$parameter)))
     stop("Parameters in argument 'pre' do not match those in argument 'rvacat'.")
   lower.ok = setNames(vector("logical", length(params)), params)
   upper.ok = lower.ok
   for(i in params){
-    vals = iha.raw[iha.raw$parameter == i, 'value']
+    vals = pre[pre$parameter == i, 'value']
     lower.ok[[i]] = if(rvacat[rvacat$parameter == i, 'lower'] > min(vals)) TRUE else FALSE
     upper.ok[[i]] = if(rvacat[rvacat$parameter == i, 'upper'] < max(vals)) TRUE else FALSE
   }

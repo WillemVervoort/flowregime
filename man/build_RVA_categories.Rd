@@ -9,7 +9,7 @@ build_RVA_categories(pre, boundaries, parametric = c(FALSE, FALSE),
 }
 \arguments{
 \item{pre}{The pre-impact IHA statistics, i.e. the output of 
-\code{IHA(..., keep.raw = TRUE)}.}
+\code{IHA(...)}.}
 
 \item{boundaries}{a two-element numeric vector of cutoffs that define the
 three RVA categories.}

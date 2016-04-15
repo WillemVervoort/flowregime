@@ -299,7 +299,7 @@ confint.IHA = function(object, parm, level = 0.95, ...){
 #' Compare the results of two IHA analyses, e.g. pre- and post-impact periods.
 #'
 #' @param pre The pre-impact IHA statistics, i.e. the output of 
-#'   \code{IHA(..., keep.raw = TRUE)}.
+#'   \code{IHA(...)}.
 #' @param post The post-impact IHA statistics.
 #' @return A dataframe containing the IHA deviation factors.
 #'
@@ -352,7 +352,7 @@ compareIHA = function(pre, post){
 #' Computes significance counts for non-parametric comparison of IHA objects.
 #'
 #' @param pre The pre-impact IHA statistics, i.e. the output of 
-#'   \code{IHA(..., keep.raw = TRUE)}.
+#'   \code{IHA(...)}.
 #' @param post The post-impact IHA statistics.
 #' @return A vector of deviation factors.
 #' 

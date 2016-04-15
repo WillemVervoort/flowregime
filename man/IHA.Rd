@@ -5,7 +5,7 @@
 \title{Indicators of Hydrologic Alteration}
 \usage{
 IHA(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, ut, lt,
-  parametric = TRUE, keep.raw = TRUE)
+  parametric = FALSE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -32,11 +32,12 @@ recommends the 25th flow percentile for pre-impact conditions.}
 of record as attribute 'raw' of the output dataframe.}
 }
 \value{
-A 3-column dataframe. If \code{stat = TRUE}, the dataframe contains 
-  the parameter names, the central tendencies and the measures of 
-  dispersion. If \code{stat = FALSE}, the dataframe contains the parameter 
-  names, the value of the attribute and the year of record (YoR) for which 
-  the attribute was computed.
+An IHA object containing the the parameter names, the value of the
+  attribute and the year of record (YoR) for which the attribute was 
+  computed. Use \code{summary()} to report the central tendencies and 
+  measures of dispersion for each parameter and \code{confint()} to compute
+  parametric or non-parametric confidence intervals for the summary 
+  statistics.
 }
 \description{
 Compute the Indicators of Hydrologic Alteration for a daily time series.
@@ -51,8 +52,8 @@ The IHA method requires a regular time series with no missing
     \item Low- and high-flow pulses occurring at the start of a year of 
       record are ignored when calculating number of pulses and mean duration
       of pulses.
-    \item IHA v7 rounds averages of flow values to the nearest whole number for
-      individual water years, and this rounding propagates through the 
+    \item IHA v7 rounds averages of flow values to the nearest whole number 
+      for individual water years, and this rounding propagates through the 
       scorecard. Numerical results may differ slightly from IHAv7.
       
 

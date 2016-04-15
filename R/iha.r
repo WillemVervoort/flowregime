@@ -17,11 +17,12 @@
 #'   (median) analysis.
 #' @param keep.raw Logical: return the hydrologic attributes for each year 
 #'   of record as attribute 'raw' of the output dataframe. 
-#' @return A 3-column dataframe. If \code{stat = TRUE}, the dataframe contains 
-#'   the parameter names, the central tendencies and the measures of 
-#'   dispersion. If \code{stat = FALSE}, the dataframe contains the parameter 
-#'   names, the value of the attribute and the year of record (YoR) for which 
-#'   the attribute was computed.
+#' @return An IHA object containing the the parameter names, the value of the
+#'   attribute and the year of record (YoR) for which the attribute was 
+#'   computed. Use \code{summary()} to report the central tendencies and 
+#'   measures of dispersion for each parameter and \code{confint()} to compute
+#'   parametric or non-parametric confidence intervals for the summary 
+#'   statistics. 
 #'
 #' @details The IHA method requires a regular time series with no missing 
 #'   values. 
@@ -31,8 +32,8 @@
 #'     \item Low- and high-flow pulses occurring at the start of a year of 
 #'       record are ignored when calculating number of pulses and mean duration
 #'       of pulses.
-#'     \item IHA v7 rounds averages of flow values to the nearest whole number for
-#'       individual water years, and this rounding propagates through the 
+#'     \item IHA v7 rounds averages of flow values to the nearest whole number 
+#'       for individual water years, and this rounding propagates through the 
 #'       scorecard. Numerical results may differ slightly from IHAv7.
 #'       
 #'
@@ -51,7 +52,7 @@
 #'
 #' @export
 IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
-  ut, lt, parametric = TRUE, keep.raw = TRUE){
+  ut, lt, parametric = FALSE){
   # argument checking
   if(yearstart == yearend)
     stop("Arguments 'yearstart' and 'yearend' must be different")
@@ -93,26 +94,9 @@ IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5,
     gd[[4]] = group4(pd, ut, lt, sets, parametric)
   if(5 %in% groups)
     gd[[5]] = looper(pd, sets, group5, parametric)  
-  res = do.call(rbind.data.frame, gd)  
-# compute stats for each group
-  pnames = unique(res$parameter)
-  pcentral = setNames(vector("numeric", length(pnames)), pnames)
-  pdispersion = pcentral
-  for(p in pnames){
-    pcentral[[p]] = mean(res[res$parameter == p, "value"])
-    pdispersion[[p]] = sd(res[res$parameter == p, "value"])/pcentral[[p]]
-  }
-  # fix for circular stats
-  for(p in c("minima JD", "maxima JD")){
-    pcentral[[p]] = circ_stat(res[res$parameter == p, "value"], mean)
-    pdispersion[[p]] = circ_stat(res[res$parameter == p, "value"], sd)/pcentral[[p]]
-}
-  res2 = data.frame(parameter = pnames, central.tendency = pcentral, 
-    dispersion = pdispersion, row.names = NULL)  
-  if(keep.raw)
-    structure(res2, raw = res)
-  else
-    res2
+  res = do.call(rbind.data.frame, gd)
+  structure(res[order(res$YoR),], parametric = parametric, 
+    class = c("IHA", "data.frame"))
 }
 
 group1 = function(r, para){
@@ -127,7 +111,7 @@ group1 = function(r, para){
   res = sapply(mnths, function(x) 
     fun(coredata(r)[which(format(index(r), "%b") == x)]))
   data.frame(parameter = paste0(tag, " (", mnths, ")"), value = res, 
-    row.names = NULL)
+    row.names = NULL, stringsAsFactors = FALSE)
 }
 
 group2 = function(r){
@@ -145,13 +129,15 @@ group2 = function(r){
   res[["no. zero-flow days"]] = number_of_no_flow_days(r, 0)
   res[["baseflow index"]] = baseflow_index(r)
 
-  data.frame(parameter = names(res), value = res, row.names = NULL)
+  data.frame(parameter = names(res), value = res, row.names = NULL, 
+    stringsAsFactors = FALSE)
 }
 
 group3 = function(r){
   max1 = get_jd(as.POSIXlt(index(r)[which.max(coredata(r))]))
   min1 = get_jd(as.POSIXlt(index(r)[which.min(coredata(r))]))  
-  data.frame(parameter = c("minima JD", "maxima JD"), value = c(min1, max1))
+  data.frame(parameter = c("minima JD", "maxima JD"), value = c(min1, max1),
+    stringsAsFactors = FALSE)
 }
 
 group4 = function(rec, ut, lt, periods, para){
@@ -184,14 +170,18 @@ group4 = function(rec, ut, lt, periods, para){
   lpidx = lapply(periods, function(x) lpf[which(lpf %in% index(rec[x]))])  
   lduridx = lapply(periods, function(x) lpdur[which(lpf %in% index(rec[x]))])
   res = vector("list", length(periods))
-  nm = 
   for(i in seq_along(res)){
     resv = setNames(c(length(lpidx[[i]]), fun(lduridx[[i]]), 
       length(hpidx[[i]]), fun(hduridx[[i]])), c("no. low pulses", 
       paste(tag, "low pulse duration"), "no. high pulses", 
-      paste(tag, "high pulse duration")))    
+      paste(tag, "high pulse duration")))
+    # handle periods with no events
+    if(length(lpidx[[i]]) < 1)
+      resv[[paste(tag, "low pulse duration")]] = 0
+    if(length(hpidx[[i]]) < 1)
+      resv[[paste(tag, "high pulse duration")]] = 0    
     res[[i]] = data.frame(parameter = names(resv), value = resv, 
-      YoR = periods[[i]], row.names = NULL)
+      YoR = periods[[i]], row.names = NULL, stringsAsFactors = FALSE)
   }
   do.call(rbind.data.frame, res)
 }
@@ -214,7 +204,48 @@ group5 = function(r, para){
   reversals = number_of_reversals(r, which = FALSE)
   res = setNames(c(meanpos, meanneg, reversals), c(paste(tag, "rise rate"), 
   paste(tag, "fall rate"), "no. reversals"))
-  data.frame(parameter = names(res), value = res, row.names = NULL)
+  data.frame(parameter = names(res), value = res, row.names = NULL, 
+    stringsAsFactors = FALSE)
+}
+
+#' @export
+summary.IHA = function(object){
+  parametric = attr(object, "parametric")
+  res = object
+  # compute stats for each group
+    pnames = unique(res$parameter)
+    pcentral = setNames(vector("numeric", length(pnames)), pnames)
+    pdispersion = pcentral
+    if(parametric){
+      cfun = mean
+      dfun = sd
+    } else {
+      cfun = median
+      dfun = function(x) IQR(x, type = 6)
+    }
+    for(p in pnames){
+      pcentral[[p]] = cfun(res[res$parameter == p, "value"])
+      pdispersion[[p]] = dfun(res[res$parameter == p, "value"])/pcentral[[p]]
+    }
+    # fix for circular stats
+    for(p in c("minima JD", "maxima JD")){
+      vals = res[res$parameter == p, "value"]
+      pcentral[[p]] = circ_stat(vals, cfun)
+      pdispersion[[p]] = if(parametric) circ_stat(vals, dfun)/366 else 
+        (366 - abs(circ_stat(vals, dfun)))/366
+    }
+    data.frame(parameter = pnames, central.tendency = pcentral, 
+      dispersion = pdispersion, row.names = NULL, stringsAsFactors = FALSE)
+}
+
+#' @export
+confint.IHA = function(object, parm, level = 0.95, ...){
+  stop("This has not been implemented")
+  parametric = attr(object, "parametric")
+  if(missing(parm))
+    parm = unique(object$parameter)
+  res = object[object$parameter %in% parm,]
+  res.summary = summary.IHA(res)
 }
 
 #' Compare IHA Results
@@ -241,30 +272,93 @@ group5 = function(r, para){
 #' compareIHA(pre, post, as.percent = TRUE, cl = TRUE)
 #'
 #' @export
-compareIHA = function(pre, post, as.percent = FALSE, cl = FALSE){
-  if(!identical(sort(pre$parameter), sort(post$parameter)))
+compareIHA = function(pre, post){
+  if(!all("IHA" %in% class(pre)) && ("IHA" %in% class(post)))
+    stop("Arguments 'pre' and 'post' must be objects of class 'IHA'.")
+  pre.parametric = attr(pre, "parametric")
+  post.parametric = attr(post, "parametric")
+  pre.s = summary.IHA(pre)
+  post.s = summary.IHA(post)
+  post.s = post.s[match(pre.s$parameter, post.s$parameter),]
+  if(!identical(pre.s$parameter, post.s$parameter) ||
+    !identical(pre.parametric, post.parametric))
     stop("'pre' and 'post' analyses do not match.")
-  post = post[match(pre$parameter, post$parameter),]
-  ctendiff = post$central.tendency - pre$central.tendency
-  dispdiff = post$dispersion - pre$dispersion
-  if(as.percent){
-    ctendiff = 100*ctendiff/pre$central.tendency
-    dispdiff = 100*dispdiff/pre$dispersion
+  cdev = abs(post.s$central.tendency - pre.s$central.tendency)
+  ddev = abs(post.s$dispersion - pre.s$dispersion)
+  if(pre.parametric){
+    cdevp = 100*cdev/pre.s$central.tendency
+    ddevp = 100*ddev/pre.s$dispersion
+  } else {
+    cdev = cdev/pre.s$central.tendency
+    ddev = ddev/pre.s$dispersion
+    sres = suppressWarnings(IHAsignif(pre, post))
+    cdevp = rowSums(sapply(sres, function(x) x$cdev > cdev))/1000
+    ddevp  = rowSums(sapply(sres, function(x) x$ddev > ddev))/1000
   }
-  res = data.frame(pre$parameter, ctendiff, dispdiff)
-  if(cl){
-    if(is.null(attr(pre, "raw")) || is.null(attr(post, "raw")))
-      warning("Cannot compute confidence levels for outputs of ",
-        "IHA(..., keep.raw = FALSE).")
-    else{
-      #res["cl.upper"] = 
-      #res["cl.lower"] = 
-    }
-  }
-  res
+  res = data.frame(pre.s$parameter, cdev, cdevp, ddev, ddevp,
+    stringsAsFactors = FALSE)
+  thenames = if(pre.parametric) 
+    c("parameter", "deviation factor (central tendency)", 
+      "deviation percent (central tendency)", "deviation factor (dispersion)", 
+      "deviation percent (dispersion)")
+    else
+      c("parameter", "deviation factor (central tendency)", 
+      "significance count (central tendency)", "deviation factor (dispersion)", 
+      "significance count (dispersion)")
+  setNames(res, thenames)
 }
 
-# circular statistics for IHA
+#' Significance Counts for IHA Comparison
+#'
+#' Computes significance counts for non-parametric comparison of IHA objects
+#' 
+IHAsignif = function(pre, post){
+  pre.y = unique(pre$YoR)
+  post.y = unique(post$YoR)
+  yrs = c(pre.y, post.y)
+  pre.n = seq(length(pre.y))
+  post.n = seq(length(pre.y) + 1, length(yrs))
+  # generate samples
+  sampyr = replicate(1000, 
+    yrs[sample(seq(length(yrs)), length(yrs), replace = FALSE)], 
+    simplify = FALSE)
+  # significance counter
+  sigtest = function(ann, newyrs){
+    pre.y.new = newyrs[pre.n]
+    post.y.new = newyrs[post.n]
+    pre.new = ann[ann$YoR %in% pre.y.new,]
+    post.new = ann[ann$YoR %in% post.y.new,]
+    pre.s.new = summary(pre.new)
+    post.s.new = summary(post.new)
+    post.s.new = post.s.new[match(pre.s.new$parameter, post.s.new$parameter),]
+    cdev = abs(post.s.new$central.tendency - pre.s.new$central.tendency)/
+      pre.s.new$central.tendency
+    ddev = abs(post.s.new$dispersion - pre.s.new$dispersion)/pre.s.new$dispersion
+    data.frame(parameter = pre.s.new$parameter, cdev, ddev)
+  }
+  # compute new deviation factors
+  lapply(sampyr, sigtest, ann = rbind(pre, post))
+}
+
+#' Circular Statistics for IHA
+#'
+#' Compute IHA circular statistics for working with Julian dates
+#'
+#' @param v Vector of Julian dates
+#' @param statfun the function to be applied, e.g. \code{mean}, \code{median}, 
+#'   \code{sd}, etc.
+#' @return The result of the circular statistic calculation.
+#'
+#' @details The algorithm works by assigning values in \code{v} to four bins
+#'   of equal width. Julian dates in certain bins are then adjusted by +/- 366 
+#'   depending on the which bin contains the most elements of \code{v}. After 
+#'   \code{statfun} is applied, the result is adjusted by +/- 366 as necessary 
+#'   to report a valid Julian date. The function will warn the user if more 
+#'   than 10% of the elements of \code{v} fall within the bin six months away 
+#'   from the primary bin; in cases where the data exhibits considerable 
+#'   scatter among Julian dates, the circular statistics will be less
+#'   informative and should be interpreted with caution.
+#' 
 circ_stat = function(v, statfun){
   q1bin = v < 92
   q2bin = (v > 91) & (v < 184)
@@ -281,11 +375,11 @@ circ_stat = function(v, statfun){
   } else if(whichbin == 1){
     v[q4bin] = v[q4bin] - 366
     res = statfun(v)
-    res = ifelse(res < 0, res + 366, res)
+    res = if(res < 0) res + 366 else res
   } else {
     v[q1bin] = v[q1bin] + 366
     res = statfun(v)
-    res = ifelse(res > 366, res - 366, res)
+    res = if(res > 366) res - 366 else res
   }
   # warn about data scatter
   n = length(v)
@@ -293,8 +387,8 @@ circ_stat = function(v, statfun){
      ((whichbin == 2) && (q4size > 0.1*n)) ||
      ((whichbin == 3) && (q1size > 0.1*n)) ||
      ((whichbin == 4) && (q2size > 0.1*n)))
-    warning("Dates of extreme flows are widely distributed throughout the ",
-      "year. Use statistics with caution.")     
+    warning("Dates of extreme flows are widely scattered. ", "
+      Use statistics with caution.", call. = FALSE)     
   res
 }
 

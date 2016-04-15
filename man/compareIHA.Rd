@@ -4,7 +4,7 @@
 \alias{compareIHA}
 \title{Compare IHA Results}
 \usage{
-compareIHA(pre, post, as.percent = FALSE, cl = FALSE)
+compareIHA(pre, post)
 }
 \arguments{
 \item{pre}{The pre-impact IHA statistics, i.e. the output of 

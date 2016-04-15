@@ -27,9 +27,6 @@ recommends the 25th flow percentile for pre-impact conditions.}
 
 \item{parametric}{Logical: perform parametric (mean) or non-parametric
 (median) analysis.}
-
-\item{keep.raw}{Logical: return the hydrologic attributes for each year 
-of record as attribute 'raw' of the output dataframe.}
 }
 \value{
 An IHA object containing the the parameter names, the value of the

@@ -11,18 +11,9 @@ compareIHA(pre, post)
 \code{IHA(..., keep.raw = TRUE)}.}
 
 \item{post}{The post-impact IHA statistics.}
-
-\item{as.percent}{If \code{TRUE}, return the differences as a relative 
-percent difference (\code{(post - pre)/pre}). Otherwise, return the 
-magnitude of difference.}
-
-\item{cl}{Logical: If \code{TRUE}, compute confidence limits for each 
-parameter.}
 }
 \value{
-A dataframe containing either the magnitude of difference or 
-  relative percent difference of each parameter, and (optionally) the upper
-  and lower confidence intervals.
+A dataframe containing the IHA deviation factors.
 }
 \description{
 Compare the results of two IHA analyses, e.g. pre- and post-impact periods.
@@ -32,7 +23,6 @@ data(siouxcity)
 pre = IHA(siouxcity['2004/2009'], ut = 32000, lt = 12000)
 post = IHA(siouxcity['2010/2014'], ut = 32000, lt = 12000)
 compareIHA(pre, post)
-compareIHA(pre, post, as.percent = TRUE, cl = TRUE)
 
 }
 

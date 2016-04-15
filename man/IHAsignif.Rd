@@ -2,11 +2,20 @@
 % Please edit documentation in R/iha.r
 \name{IHAsignif}
 \alias{IHAsignif}
-\title{Significance Counts for IHA Comparison}
+\title{Computes significance counts for non-parametric comparison of IHA objects.}
 \usage{
 IHAsignif(pre, post)
 }
+\arguments{
+\item{pre}{The pre-impact IHA statistics, i.e. the output of 
+\code{IHA(..., keep.raw = TRUE)}.}
+
+\item{post}{The post-impact IHA statistics.}
+}
+\value{
+A vector of deviation factors.
+}
 \description{
-Computes significance counts for non-parametric comparison of IHA objects
+Computes significance counts for non-parametric comparison of IHA objects.
 }
 

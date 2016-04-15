@@ -5,7 +5,7 @@
 \title{Indicators of Hydrologic Alteration}
 \usage{
 IHA(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, ut, lt,
-  parametric = FALSE)
+  parametric = TRUE)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
@@ -62,9 +62,8 @@ The IHA method requires a regular time series with no missing
 \examples{
 data(siouxcity)
 IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000)
-IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, keep.raw = FALSE)
 IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
-  yearend = "09-30", ut = 32000, lt = 12000)
+  yearend = "09-30", ut = 32000, lt = 12000, parametric = FALSE)
 
 }
 \references{

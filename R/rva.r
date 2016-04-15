@@ -111,8 +111,8 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
   parambounds = setNames(vector("list", length(params)), params)
   for(i in params){
     vals = pre[pre$parameter == i, "value"]
-    parambounds[[i]] = data.frame(parameter = i, lower = lfun(d, bnd[[1]]), 
-      upper = ufun(d, bnd[[2]]), row.names = NULL, stringsAsFactors = FALSE)
+    parambounds[[i]] = data.frame(parameter = i, lower = lfun(vals, bnd[[1]]), 
+      upper = ufun(vals, bnd[[2]]), row.names = NULL, stringsAsFactors = FALSE)
   }
   do.call(rbind.data.frame, parambounds)
 }

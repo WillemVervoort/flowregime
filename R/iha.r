@@ -46,13 +46,12 @@
 #' @examples
 #' data(siouxcity)
 #' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000)
-#' IHA(siouxcity['2009/2011'], ut = 32000, lt = 12000, keep.raw = FALSE)
 #' IHA(siouxcity['2009-10-01/2011-09-30'], yearstart = "10-01", 
-#'   yearend = "09-30", ut = 32000, lt = 12000)
+#'   yearend = "09-30", ut = 32000, lt = 12000, parametric = FALSE)
 #'
 #' @export
 IHA = function(ts, yearstart = "01-01", yearend = "12-31", groups = 1:5, 
-  ut, lt, parametric = FALSE){
+  ut, lt, parametric = TRUE){
   # argument checking
   if(yearstart == yearend)
     stop("Arguments 'yearstart' and 'yearend' must be different")
@@ -255,21 +254,13 @@ confint.IHA = function(object, parm, level = 0.95, ...){
 #' @param pre The pre-impact IHA statistics, i.e. the output of 
 #'   \code{IHA(..., keep.raw = TRUE)}.
 #' @param post The post-impact IHA statistics.
-#' @param as.percent If \code{TRUE}, return the differences as a relative 
-#'   percent difference (\code{(post - pre)/pre}). Otherwise, return the 
-#'   magnitude of difference.
-#' @param cl Logical: If \code{TRUE}, compute confidence limits for each 
-#'   parameter.
-#' @return A dataframe containing either the magnitude of difference or 
-#'   relative percent difference of each parameter, and (optionally) the upper
-#'   and lower confidence intervals.
+#' @return A dataframe containing the IHA deviation factors.
 #'
 #' @examples
 #' data(siouxcity)
 #' pre = IHA(siouxcity['2004/2009'], ut = 32000, lt = 12000)
 #' post = IHA(siouxcity['2010/2014'], ut = 32000, lt = 12000)
 #' compareIHA(pre, post)
-#' compareIHA(pre, post, as.percent = TRUE, cl = TRUE)
 #'
 #' @export
 compareIHA = function(pre, post){
@@ -308,9 +299,14 @@ compareIHA = function(pre, post){
   setNames(res, thenames)
 }
 
-#' Significance Counts for IHA Comparison
+# Significance Counts for IHA Comparison
 #'
-#' Computes significance counts for non-parametric comparison of IHA objects
+#' Computes significance counts for non-parametric comparison of IHA objects.
+#'
+#' @param pre The pre-impact IHA statistics, i.e. the output of 
+#'   \code{IHA(..., keep.raw = TRUE)}.
+#' @param post The post-impact IHA statistics.
+#' @return A vector of deviation factors.
 #' 
 IHAsignif = function(pre, post){
   pre.y = unique(pre$YoR)

@@ -55,7 +55,7 @@ rva_freq = function(iha.raw, cats){
   params = unique(iha.raw$parameter)
   res = setNames(vector("list", length(params)), params)
   for(i in params){
-    vals = subset(iha.raw, parameter == i)$value
+    vals = iha.raw[iha.raw$parameter == i, 'value']
     low = vals < cats[cats$parameter == i, 'lower']
     high = vals > cats[cats$parameter == i, 'upper']
     mid = !(low | high)
@@ -108,7 +108,7 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
   params = unique(iha.raw$parameter)
   parambounds = setNames(vector("list", length(params)), params)
   for(i in params){
-    d = subset(iha.raw, parameter == i)
+    d = iha.raw[iha.raw$parameter == i,]
     parambounds[[i]] = data.frame(parameter = i, 
       lower = lfun(d$value, bnd[[1]]), upper = ufun(d$value, bnd[[2]]), 
       row.names = NULL, stringsAsFactors = FALSE)
@@ -122,7 +122,7 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
 #' outside the range of values in the pre-impact dataset for any parameter, 
 #' a warning will be issued.
 #'
-#'@param rvacat The RVA categories, as defined by e.g. RVA_categories(pre)
+#' @param rvacat The RVA categories, as defined by e.g. RVA_categories(pre).
 #' @param pre The pre-impact IHA statistics used to define the RVA categories, 
 #'   i.e. the output of \code{IHA(..., keep.raw = TRUE)}.
 #' @return A dataframe of 3 columns:
@@ -136,7 +136,7 @@ check_RVA_categories = function(rvacat, pre){
   lower.ok = setNames(vector("logical", length(params)), params)
   upper.ok = lower.ok
   for(i in params){
-    vals = subset(iha.raw, parameter == i)$value
+    vals = iha.raw[iha.raw$parameter == i, 'value']
     lower.ok[[i]] = if(rvacat[rvacat$parameter == i, 'lower'] > min(vals)) TRUE else FALSE
     upper.ok[[i]] = if(rvacat[rvacat$parameter == i, 'upper'] < max(vals)) TRUE else FALSE
   }

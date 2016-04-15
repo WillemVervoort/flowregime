@@ -20,7 +20,7 @@
 #' @importFrom stats setNames
 #' @export
 RVA = function(pre, post, rvacat){
-  if(!identical(sort(pre$parameters), sort(post$parameters)))
+  if(!identical(sort(pre$parameter), sort(post$parameter)))
     stop("'pre' and 'post' analyses do not match.")
   check_RVA_categories(rvacat, pre)
   # define RVA boundaries

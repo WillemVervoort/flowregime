@@ -5,23 +5,30 @@ Hydrologic Alteration (IHA). The analysis of the Roanoke Rapids flow record
 described in Richter et al (1996) is repeated using both IHA v7 and the 
 `IHA` function provided by `flowregime`.
 
-```{r load data}
+```{r iha}
 setwd("C:/repository")
 devtools::load_all("flowregime")
 data(roanokerapids)
 pre.period = roanokerapids['1912-10-01/1949-09-30']
 post.period = roanokerapids['1955-10-01/1991-09-30']
-hpthresh = mean(pre.period) + sd(pre.period)
+hpthresh = quantile(pre.period, 0.75)[[1]]
 lpthresh = quantile(pre.period, 0.25)[[1]]
 pre.results = IHA(pre.period, ut = hpthresh, lt = lpthresh, 
-  yearstart = "10-01", yearend = "09-30", parametric = TRUE)
+  yearstart = "10-01", yearend = "09-30", parametric = FALSE)
 post.results = IHA(post.period, ut = hpthresh, lt = lpthresh, 
-  yearstart = "10-01", yearend = "09-30", parametric = TRUE)
-comp.results = compareIHA(pre.results, post.results, as.percent = FALSE, 
-  cl = FALSE)
+  yearstart = "10-01", yearend = "09-30", parametric = FALSE)
+summary(pre.results)
+compareIHA(pre.results, post.results)
 ```
 
+The Range of Variability Approach (RVA) provided by the IHA software can also
+be implemented using `flowregime`.
 
+```{r rva}
+rva.categories = build_RVA_categories(pre.results, parametric = FALSE)
+rva.results = RVA(pre.results, post.results, rva.categories)
+
+```
 
 
 

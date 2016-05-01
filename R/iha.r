@@ -155,11 +155,17 @@ group4 = function(rec, ut, lt, periods, para){
     ignore.first = TRUE)
   hpl = number_of_high_pulses(rec, ut, which = TRUE, return.which = "last", 
     ignore.first = TRUE)
+  if(tail(hpl, 1) == tail(index(rec), 1))
+    warning("A high pulse has been truncated by missing year ", 
+      as.numeric(format(tail(hpl, 1), "%Y")) + 1, ".", call. = FALSE)
   hpdur = interval + hpl - hpf
   lpf = number_of_low_pulses(rec, lt, which = TRUE, return.which = "first", 
     ignore.first = TRUE, min.dur = as.difftime(1, units = "days"))
   lpl = number_of_low_pulses(rec, lt, which = TRUE, return.which = "last", 
     ignore.first = TRUE, min.dur = as.difftime(1, units = "days"))
+  if(tail(lpl, 1) == tail(index(rec), 1))
+    warning("A low pulse has been truncated by missing year ", 
+      as.numeric(format(tail(lpl, 1), "%Y")) + 1, ".", call. = FALSE)
   lpdur = interval + lpl - lpf
   # split by period
   hpidx = lapply(periods, function(x) hpf[which(hpf %in% index(rec[x]))])  
@@ -431,7 +437,7 @@ circ_stat = function(v, statfun){
      ((whichbin == 2) && (q4size > 0.1*n)) ||
      ((whichbin == 3) && (q1size > 0.1*n)) ||
      ((whichbin == 4) && (q2size > 0.1*n)))
-    warning("Dates of extreme flows are widely scattered. ", "
+    warning("Dates of extremes are widely scattered. ", "
       Use statistics with caution.", call. = FALSE)     
   res
 }

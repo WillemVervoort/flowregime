@@ -110,7 +110,9 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
     parambounds[[i]] = data.frame(parameter = i, lower = lfun(vals, bnd[[1]]), 
       upper = ufun(vals, bnd[[2]]), row.names = NULL, stringsAsFactors = FALSE)
   }
-  do.call(rbind.data.frame, parambounds)
+  res = do.call(rbind.data.frame, parambounds)
+  rownames(res) = NULL
+  res
 }
 
 #' Check RVA Categories
@@ -141,4 +143,27 @@ check_RVA_categories = function(rvacat, pre){
       paste(params[!upper.ok | !lower.ok], collapse = "', '"), "'.")
   data.frame(parameter = params, lower.ok = lower.ok, upper.ok = upper.ok,
     row.names = NULL, stringsAsFactors = FALSE)
+}
+
+
+#' Replace RVA Categories
+#'
+#' Replace faulty RVA category definitions.
+#'
+#' @param rvacat The RVA category specification containing faulty values, i.e.
+#'   the output of \code{build_RVA_categories(...)}.
+#' @param faulty Identifies elements of \code{rvacat} that are faulty, e.g. the
+#'   output of \code{check_RVA_categories(rvacat, ...)}.
+#' @param newcat The new RVA category specifications, i.e. the output of 
+#'   \code{build_RVA_categories(...)}.
+#' @return A combination of \code{rvacat} and \code{newcat}, where the faulty
+#'   elements of \code{rvacat} as defined by \code{mask} are replaced with
+#'   values from \code{newcat}
+#'
+#' @export
+replace_RVA_categories = function(rvacat, faulty, newcat){
+  mask = !faulty[order(faulty, rvacat), 2:3]
+  newcat = newcat[order(newcat, rvacat),]
+  rvacat[, 2:3][mask] = newcat[, 2:3][mask]
+  rvacat
 }

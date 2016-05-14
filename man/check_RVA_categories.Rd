@@ -7,7 +7,8 @@
 check_RVA_categories(rvacat, pre)
 }
 \arguments{
-\item{rvacat}{The RVA categories, as defined by e.g. RVA_categories(pre).}
+\item{rvacat}{The RVA categories, as defined by e.g. 
+\code{build_RVA_categories(...)}.}
 
 \item{pre}{The pre-impact IHA statistics used to define the RVA categories, 
 i.e. the output of \code{IHA(...)}.}

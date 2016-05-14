@@ -7,6 +7,9 @@
 #' @docType package
 #' @import zoo
 #' @import xts
+#' @importFrom stats median
+#' @importFrom stats na.contiguous
+#' @importFrom stats sd
 NULL
 
 #' Missouri River Flows at Sioux City, IA
@@ -580,7 +583,7 @@ number_of_reversals = function(ts, which = FALSE){
   dpd[1] = dpd[2]
   f = which.min(!(dpd != 0))
   dpd[1:f] = dpd[f]
-  # identify periods of no change and group with preceding behavior
+  # identify periods of no change and group with preceding behaviour
   zidx = NA
   while(length(zidx) > 0){
     zidx = which(!(dpd != 0))

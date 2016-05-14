@@ -121,7 +121,8 @@ build_RVA_categories = function(pre, boundaries, parametric = c(FALSE, FALSE),
 #' outside the range of values in the pre-impact dataset for any parameter, 
 #' a warning will be issued.
 #'
-#' @param rvacat The RVA categories, as defined by e.g. RVA_categories(pre).
+#' @param rvacat The RVA categories, as defined by e.g. 
+#'   \code{build_RVA_categories(...)}.
 #' @param pre The pre-impact IHA statistics used to define the RVA categories, 
 #'   i.e. the output of \code{IHA(...)}.
 #' @return A dataframe of 3 columns:

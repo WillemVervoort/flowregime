@@ -4,17 +4,10 @@
 \alias{EFC}
 \title{IHA Environmental Flow Components}
 \usage{
-EFC(ts, yearstart = "01-01", yearend = "12-31", method = c("standard",
-  "advanced"), thresholds = list())
+EFC(ts, method = c("standard", "advanced"), thresholds)
 }
 \arguments{
 \item{ts}{A time series of class \code{xts}.}
-
-\item{yearstart}{A character vector specifying the month and day signifying
-the start of the water year, in the format "mm-dd". Default is "01-01".}
-
-\item{yearend}{A character vector specifying the month and day signifying
-the end of the water year, in the format "mm-dd". Default is "12-31".}
 
 \item{method}{The method used to compute environmental flow components:
 may be either 'standard' or 'advanced'.}
@@ -22,9 +15,15 @@ may be either 'standard' or 'advanced'.}
 \item{thresholds}{A list containing all or some of the following elements:}
 }
 \value{
-An \code{xts} time series of EFC factors.
+A copy of \code{ts} with an additional column containing EFC labels.
 }
 \description{
 Compute the IHA Environmental Flow Components (EFCs).
+}
+\examples{
+data(roanokerapids)
+EFC(roanokerapids)
+EFC(roanokerapids, method = "advanced")
+
 }
 

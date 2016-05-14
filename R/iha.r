@@ -155,17 +155,11 @@ group4 = function(rec, ut, lt, periods, para){
     ignore.first = TRUE)
   hpl = number_of_high_pulses(rec, ut, which = TRUE, return.which = "last", 
     ignore.first = TRUE)
-  if(tail(hpl, 1) == tail(index(rec), 1))
-    warning("A high pulse has been truncated by missing year ", 
-      as.numeric(format(tail(hpl, 1), "%Y")) + 1, ".", call. = FALSE)
   hpdur = interval + hpl - hpf
   lpf = number_of_low_pulses(rec, lt, which = TRUE, return.which = "first", 
     ignore.first = TRUE, min.dur = as.difftime(1, units = "days"))
   lpl = number_of_low_pulses(rec, lt, which = TRUE, return.which = "last", 
     ignore.first = TRUE, min.dur = as.difftime(1, units = "days"))
-  if(tail(lpl, 1) == tail(index(rec), 1))
-    warning("A low pulse has been truncated by missing year ", 
-      as.numeric(format(tail(lpl, 1), "%Y")) + 1, ".", call. = FALSE)
   lpdur = interval + lpl - lpf
   # split by period
   hpidx = lapply(periods, function(x) hpf[which(hpf %in% index(rec[x]))])  
@@ -186,6 +180,14 @@ group4 = function(rec, ut, lt, periods, para){
     res[[i]] = data.frame(parameter = names(resv), value = resv, 
       YoR = periods[[i]], row.names = NULL, stringsAsFactors = FALSE)
   }
+  if(length(hpl) > 0)
+    if(tail(hpl, 1) == tail(index(rec), 1))
+    warning("A high pulse has been truncated by missing year ", 
+      as.numeric(format(tail(hpl, 1), "%Y")) + 1, ".", call. = FALSE)
+  if(length(lpl) > 0)
+    if(tail(lpl, 1) == tail(index(rec), 1))
+      warning("A low pulse has been truncated by missing year ", 
+        as.numeric(format(tail(lpl, 1), "%Y")) + 1, ".", call. = FALSE)
   do.call(rbind.data.frame, res)
 }
 

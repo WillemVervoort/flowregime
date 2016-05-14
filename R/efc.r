@@ -17,8 +17,7 @@
 EFC = function(ts, method = c("standard", "advanced"), thresholds){
   method = match.arg(tolower(method), c("standard", "advanced"))
   if(missing(thresholds))
-    
-    thresholds = EFC_default_thresholds(ts, method)
+    thresholds = build_EFC_thresholds(ts, method)
   if(method == "standard")
     res = EFC_standard(coredata(ts), thresholds)
   else

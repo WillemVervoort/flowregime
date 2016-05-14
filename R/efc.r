@@ -1,51 +1,23 @@
-#' Default thresholds for EFC Analysis
-#'
-#' @param ts A time series of class \code{xts}.
-#' @param method The method used to compute environmental flow components:
-#'   may be either 'standard' or 'advanced'.
-#' @return a list containing the following thresholds:
-#'
-#'
-#' @seealso \link{EFC}
-#'
-#' 
-EFC_default_thresholds = function(ts, method = c("standard", "advanced")){
-  method = match.arg(tolower(method), c("standard", "advanced"))
-    if(method == "standard")
-      list(
-        "high flow" = quantile(coredata(ts), 0.75)[[1]]
-      )
-    else
-      list(
-        "high flow" = quantile(coredata(ts), 0.75)[[1]],
-        "low flow" = quantile(coredata(ts), 0.50)[[1]],
-        "high flow start rate" = 1.25,
-        "high flow end rate" = 0.9,
-        "small flood minimum peak flow" = 50000,
-        "large flood minimum peak flow" = 100000,
-        "extreme low flow" = quantile(coredata(ts), 0.10)[[1]]
-      )
-}
-
 #' IHA Environmental Flow Components
 #'
 #' Compute the IHA Environmental Flow Components (EFCs).
 #'
 #' @param ts A time series of class \code{xts}.
-#' @param yearstart A character vector specifying the month and day signifying
-#'   the start of the water year, in the format "mm-dd". Default is "01-01".
-#' @param yearend A character vector specifying the month and day signifying
-#'   the end of the water year, in the format "mm-dd". Default is "12-31".
 #' @param method The method used to compute environmental flow components:
 #'   may be either 'standard' or 'advanced'.
 #' @param thresholds A list containing all or some of the following elements:
-#' @return An \code{xts} time series of EFC factors.
+#' @return A copy of \code{ts} with an additional column containing EFC labels.
 #'
+#' @examples
+#' data(roanokerapids)
+#' EFC(roanokerapids)
+#' EFC(roanokerapids, method = "advanced")
 #'
-#'
+#' @export
 EFC = function(ts, method = c("standard", "advanced"), thresholds){
   method = match.arg(tolower(method), c("standard", "advanced"))
   if(missing(thresholds))
+    
     thresholds = EFC_default_thresholds(ts, method)
   if(method == "standard")
     res = EFC_standard(coredata(ts), thresholds)
@@ -146,3 +118,52 @@ EFC_advanced = function(f, thresholds){
       res[f <= thresholds[[i]]] = i
   res
 }
+
+#' Default thresholds for EFC Analysis
+#'
+#' @param ts A time series of class \code{xts}.
+#' @param method The method used to compute environmental flow components:
+#'   may be either 'standard' or 'advanced'.
+#' @return a list containing the following thresholds:
+#'
+#'
+#' @seealso \link{EFC}
+#'
+#' @export
+build_EFC_thresholds = function(ts, method = c("standard", "advanced")){
+  method = match.arg(tolower(method), c("standard", "advanced"))
+    if(method == "standard")
+      list(
+        "high flow" = quantile(coredata(ts), 0.75)[[1]],
+        "extreme low flow" = quantile(coredata(ts), 0.10)[[1]]
+      )
+    else
+      list(
+        "high flow" = quantile(coredata(ts), 0.75)[[1]],
+        "low flow" = quantile(coredata(ts), 0.50)[[1]],
+        "high flow start rate" = 1.25,
+        "high flow end rate" = 0.9,
+        "small flood minimum peak flow" = quantile(coredata(apply.yearly(ts, max)), 
+          0.5, type = 6)[[1]],
+        "large flood minimum peak flow" = quantile(coredata(apply.yearly(ts, max)), 
+          0.9, type = 6)[[1]],
+        "extreme low flow" = quantile(coredata(ts), 0.10)[[1]]
+      )
+}
+
+#' Check EFC Thresholds
+#'
+#' Check the suitability of EFC thresholds. If thresholds result in classes 
+#' outside the range of values in the pre-impact dataset for any parameter, 
+#' a warning will be issued.
+#'
+#' @param efcthresh The EFC thresholds, as defined by e.g. 
+#'   \code{build_EFC_thresholds(...)}.
+#' @param ts The time series that the EFC thresholds will be applied to.
+#' @return A dataframe of 3 columns:
+#'
+#' @export
+check_EFC_thresholds = function(efcthresh, ts){
+
+}
+

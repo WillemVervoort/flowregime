@@ -6,6 +6,6 @@ README.md
 .gitattribute
 .vs
 .git
-*.rproj
-*.rxproj
-*.sln
+flowregime.rproj
+flowregime.rxproj
+flowregime.sln

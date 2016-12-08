@@ -1,3 +1,6 @@
+%\VignetteEngine{knitr} 
+%\VignetteIndexEntry{IHA verification} 
+
 # Verification of the IHA algorithm
 
 This vignette verifies the `flowregime` package implementation of Indicators of

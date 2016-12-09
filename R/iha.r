@@ -327,8 +327,8 @@ compareIHA = function(pre, post){
   pre.s = summary.IHA(pre)
   post.s = summary.IHA(post)
   post.s = post.s[match(pre.s$parameter, post.s$parameter),]
-  if(!identical(pre.s$parameter, post.s$parameter) ||
-    !identical(pre.parametric, post.parametric))
+  if(!(identical(pre.s$parameter, post.s$parameter) &&
+    identical(pre.parametric, post.parametric)))
     stop("'pre' and 'post' analyses do not match.")
   cdev = abs(post.s$central.tendency - pre.s$central.tendency)
   ddev = abs(post.s$dispersion - pre.s$dispersion)

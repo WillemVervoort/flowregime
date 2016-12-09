@@ -20,13 +20,14 @@
 #' @importFrom stats setNames
 #' @export
 RVA = function(pre, post, rvacat){
-  if(!identical(sort(pre$parameter), sort(post$parameter)))
-    stop("'pre' and 'post' analyses do not match.")
   check_RVA_categories(rvacat, pre)
   # define RVA boundaries
   # get pre and post counts for each RVA category
   pre.freq = rva_freq(pre, rvacat)
   post.freq = rva_freq(post, rvacat)
+  post.freq = post.freq[match(names(pre.freq), names(post.freq))]
+  if (!identical(names(pre.freq), names(post.freq)))
+    stop("'pre' and 'post' analyses do not match.")
   # calculate HA Factor
   ratio = length(unique(post$YoR))/length(unique(pre$YoR))
   get_HAF = function(o, e) 

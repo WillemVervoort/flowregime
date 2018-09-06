@@ -161,7 +161,7 @@ longest_high_flow_duration = function(ts, ut, which = FALSE){
     if(which)
       return(integer(0))
     else
-      return(0)
+      return(index(ts)[1] - index(ts)[1])
   m = na.contiguous(pd)
   if(which)
     index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
@@ -200,7 +200,7 @@ longest_low_flow_duration = function(ts, lt, which = FALSE){
     if(which)
       return(integer(0))
     else
-      return(0)
+      return(index(ts)[1] - index(ts)[1])
   m = na.contiguous(pd)
   if(which)
     index(ts)[seq(from = which(index(ts) == head(index(m), 1)), 
@@ -234,7 +234,7 @@ total_time_above_threshold = function(ts, ut, which = FALSE){
   if(which)
     return(index(ts)[d])
   if(length(d) < 1)
-    return(0)
+    return(index(ts)[1] - index(ts)[1])
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
     warning("Time series is irregular. Result may be erroneous.")
@@ -267,7 +267,7 @@ total_time_below_threshold = function(ts, lt, which = FALSE){
   if(which)
     return(index(ts)[d])
   if(length(d) < 1)
-    return(0)
+    return(index(ts)[1] - index(ts)[1])
   dt = diff(index(pd))
   if(length(unique(dt)) > 1)
     warning("Time series is irregular. Result may be erroneous.")
@@ -409,7 +409,7 @@ mean_high_pulse_duration = function(ts, ut, ignore.first = FALSE){
   pd = ts
   pd[ts < ut] = NA
   if(all(is.na(pd)))
-    return(0)
+    return(index(ts)[1] - index(ts)[1])
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
@@ -418,7 +418,8 @@ mean_high_pulse_duration = function(ts, ut, ignore.first = FALSE){
     if(pulses[[1]][1] == index(ts)[1])
       pulses[[1]] = NULL
   }
-  pulselengths = sapply(pulses, function(x) interval + max(x) - min(x))
+  pulselengths = do.call(c, lapply(pulses, function(x) 
+      interval + max(x) - min(x)))
   mean(pulselengths)
 }
 
@@ -447,7 +448,7 @@ mean_low_pulse_duration = function(ts, lt, ignore.first = FALSE){
   pd = ts
   pd[ts > lt] = NA
   if(all(is.na(pd)))
-    return(0)
+    return(index(ts)[1] - index(ts)[1])
   idx <- 1 + cumsum(is.na(coredata(pd)))
   not.na <- !is.na(coredata(pd))
   pulses = split(index(pd)[not.na], idx[not.na])
@@ -456,7 +457,8 @@ mean_low_pulse_duration = function(ts, lt, ignore.first = FALSE){
     if(pulses[[1]][1] == index(ts)[1])
       pulses[[1]] = NULL
   }
-  pulselengths = sapply(pulses, function(x) interval + max(x) - min(x))
+  pulselengths = do.call(c, lapply(pulses, function(x) 
+      interval + max(x) - min(x)))
   mean(pulselengths)
 }
 
@@ -583,7 +585,7 @@ number_of_reversals = function(ts, which = FALSE){
   dpd[1] = dpd[2]
   f = which.min(!(dpd != 0))
   dpd[1:f] = dpd[f]
-  # identify periods of no change and group with preceding behaviour
+  # identify periods of no change and group with preceding behavior
   zidx = NA
   while(length(zidx) > 0){
     zidx = which(!(dpd != 0))

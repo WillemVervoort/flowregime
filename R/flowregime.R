@@ -576,24 +576,38 @@ average_maximum_flow = function(ts, n = 1, which = FALSE){
 #' number_of_reversals(siouxcity['2009-01'], which = TRUE)
 #'
 #' @export
-number_of_reversals = function(ts, which = FALSE){
+number_of_reversals <- function(ts, which = FALSE){
   if(any(is.na(coredata(ts))))
     warning("NA values detected. Result may be erroneous.")
+  #browser()
   # detect flow changes
   dpd = c(sign(0), sign(diff(coredata(ts))))
   # ignore first flow change and deal with leading zeros
   dpd[1] = dpd[2]
   f = which.min(!(dpd != 0))
   dpd[1:f] = dpd[f]
-  # identify periods of no change and group with preceding behavior
-  zidx = NA
-  while(length(zidx) > 0){
-    zidx = which(!(dpd != 0))
-    dpd[zidx] = dpd[zidx - 1]
-  }
+  # # identify periods of no change and group with preceding behavior
+  # zidx = NA
+  # while(length(zidx) > 0){
+  #   zidx = which(!(dpd != 0))
+  #   dpd[zidx] = dpd[zidx - 1]
+  # }
   # identify reversals
-  revflow = rollapply(dpd, 2, function(x) x[2] != x[1], align = "right", 
-    fill = "FALSE")
+  # zeros
+  zeros <- which(dpd == 0)
+  # values
+  value <- which(dpd !=0)
+  # get rid of zeros temporarily
+  dpd1 <- dpd[value]
+  # calculate reversals
+  result <- rollapply(dpd1, 2, function(x) x[2] != x[1], align = "right", 
+                      fill = "FALSE")
+  # merge results with no change periods
+  revflow <- dpd
+  revflow[value] <- result
+  revflow[zeros] <- FALSE
+  # revflow = rollapply(dpd, 2, function(x) x[2] != x[1], align = "right", 
+  #                     fill = "FALSE")
   if(which)  
     index(ts[which(revflow)])
   else
